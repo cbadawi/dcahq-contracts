@@ -1,0 +1,101 @@
+[project]
+name = 'memepool'
+description = ''
+authors = []
+telemetry = true
+cache_dir = './.cache'
+
+[[project.requirements]]
+contract_id = 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01'
+
+[[project.requirements]]
+contract_id = 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-sip-010'
+
+[[project.requirements]]
+contract_id = 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-share-fee-to-trait'
+
+[[project.requirements]]
+contract_id = 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-router'
+
+[[project.requirements]]
+contract_id = 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-share-fee-to'
+
+[[project.requirements]]
+contract_id = 'SP2AKWJYC7BNY18W1XXKPGP0YVEK63QJG4793Z2D4.sip-010-trait-ft-standard'
+[contracts.auth]
+path = 'contracts/auth.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.dca-manager]
+path = 'contracts/dca-manager.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.dca-vault]
+path = 'contracts/dca-vault.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.default-strategy]
+path = 'contracts/default-strategy.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.mock-alex]
+path = 'contracts/mocks/mock-alex.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.mock-velar]
+path = 'contracts/mocks/mock-velar.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.sbtc]
+path = 'contracts/tokens/sbtc.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.sip-010-trait]
+path = 'contracts/traits/sip-010-trait.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.strategy]
+path = 'contracts/traits/strategy.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.swap-router]
+path = 'contracts/swap-router.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.welsh]
+path = 'contracts/tokens/welsh.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.wusd]
+path = 'contracts/tokens/wusd.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.wusd-6]
+path = 'contracts/wusd-6.clar'
+clarity_version = 2
+epoch = 2.4
+
+[repl]
+clarity_wasm_mode = false
+show_timings = false
+
+[repl.analysis]
+passes = ['check_checker']
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = false
+trusted_caller = false
+callee_filter = false

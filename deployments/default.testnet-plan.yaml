@@ -1,0 +1,140 @@
+---
+id: 0
+name: Testnet deployment
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - requirement-publish:
+            contract-id: SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.extension-trait
+            remap-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            remap-principals:
+              SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 950
+            path: "./.cache/requirements/SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.extension-trait.clar"
+            clarity-version: 2
+        - requirement-publish:
+            contract-id: SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.proposal-trait
+            remap-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            remap-principals:
+              SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 810
+            path: "./.cache/requirements/SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.proposal-trait.clar"
+            clarity-version: 2
+        - requirement-publish:
+            contract-id: SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.executor-dao
+            remap-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            remap-principals:
+              SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 23620
+            path: "./.cache/requirements/SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.executor-dao.clar"
+            clarity-version: 2
+        - requirement-publish:
+            contract-id: SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-sip-010
+            remap-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            remap-principals:
+              SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 13010
+            path: "./.cache/requirements/SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-sip-010.clar"
+            clarity-version: 2
+        - requirement-publish:
+            contract-id: SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-registry-v2-01
+            remap-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            remap-principals:
+              SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 103820
+            path: "./.cache/requirements/SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-registry-v2-01.clar"
+            clarity-version: 2
+        - requirement-publish:
+            contract-id: SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-flash-loan-user
+            remap-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            remap-principals:
+              SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 1690
+            path: "./.cache/requirements/SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-flash-loan-user.clar"
+            clarity-version: 2
+        - requirement-publish:
+            contract-id: SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-semi-fungible
+            remap-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            remap-principals:
+              SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 16310
+            path: "./.cache/requirements/SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-semi-fungible.clar"
+            clarity-version: 2
+        - requirement-publish:
+            contract-id: SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-vault-v2-01
+            remap-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            remap-principals:
+              SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 52220
+            path: "./.cache/requirements/SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-vault-v2-01.clar"
+            clarity-version: 2
+        - requirement-publish:
+            contract-id: SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.token-amm-pool-v2-01
+            remap-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            remap-principals:
+              SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 107330
+            path: "./.cache/requirements/SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.token-amm-pool-v2-01.clar"
+            clarity-version: 2
+        - requirement-publish:
+            contract-id: SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01
+            remap-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            remap-principals:
+              SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 406590
+            path: "./.cache/requirements/SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01.clar"
+            clarity-version: 2
+        - contract-publish:
+            contract-name: auth
+            expected-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 30240
+            path: contracts/auth.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: sip-010-trait
+            expected-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 30240
+            path: contracts/traits/sip-010-trait.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: dca-vault
+            expected-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 30210
+            path: contracts/dca-vault.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: mock-alex
+            expected-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 30150
+            path: contracts/mock-alex.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: dca-manager
+            expected-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 31560
+            path: contracts/dca-manager.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: sbtc
+            expected-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 30840
+            path: contracts/tokens/sbtc.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: wusd
+            expected-sender: ST2DXD0PM9XA4266TE30ZCCX4H4NPWV76PCDH5ZE
+            cost: 30840
+            path: contracts/tokens/wusd.clar
+            anchor-block-only: true
+            clarity-version: 2
+      epoch: "2.4"
