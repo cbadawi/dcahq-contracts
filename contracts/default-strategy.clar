@@ -28,8 +28,6 @@
 			 (ok swap-response)
 )))
 
-
-
 (define-private (swap (source-trait <ft>) 
 															(target-trait <ft>) 
 															(source-factor uint) 

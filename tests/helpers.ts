@@ -1,20 +1,20 @@
 import { Cl } from "@stacks/transactions"
 
 // fpmm errors
-export const ERR_NOT_AUTHORIZED = Cl.uint(1000)
-export const ERR_INVALID_AMOUNT = Cl.uint(2001)
-export const ERR_INVALID_PRINCIPAL = Cl.uint(2002)
-export const ERR_INVALID_INTERVAL = Cl.uint(2003)
-export const ERR_INVALID_KEY = Cl.uint(2004)
-export const ERR_DCA_ALREADY_EXISTS = Cl.uint(2005)
-export const ERR_INVALID_PRICE = Cl.uint(2006)
+export const ERR_NOT_AUTHORIZED = Cl.uint(9999)
+export const ERR_INVALID_AMOUNT = Cl.uint(9001)
+export const ERR_INVALID_PRINCIPAL = Cl.uint(9002)
+export const ERR_INVALID_INTERVAL = Cl.uint(9003)
+export const ERR_INVALID_KEY = Cl.uint(9004)
+export const ERR_DCA_ALREADY_EXISTS = Cl.uint(9005)
+export const ERR_INVALID_PRICE = Cl.uint(9006)
 
 export const UNIT = 10 ** 8
 export const fourPercent = UNIT * 0.04
 export const defaultTotalAmount = 1000_00000000
 export const defaultDcaAmount = 100_00000000
 
-const maxUint128Value = 9007199254740991
+export const maxUint128Value = 9007199254740991
 
 export const prettyEvents = (events: any, functionName = "") => {
   // console.log({ rawEvents: events })
@@ -77,14 +77,12 @@ export const defaultSourcesTokenConfig: SourcesTargetConfigsParams = {
   hopFactor: defaultFactor,
   minDcaThreshold: 0,
   maxDcaThreshold: maxUint128Value,
-  strategyPrincipal: defaultStrategyContract,
   maxSlipage: fourPercent,
   isSourceNumerator: false
 }
 
 export enum INTERVALS {
   hours2,
-  hours12,
   daily,
   weekly
 }
@@ -94,6 +92,15 @@ export const addApproved = (address: string) => {
     authContract,
     "add-approved-contract",
     [Cl.principal(address)],
+    contractDeployer
+  )
+}
+
+export const addStrategy = (address: string) => {
+  return simnet.callPublicFn(
+    dcaManagerContract,
+    "set-approved-strategy",
+    [Cl.principal(address), Cl.bool(true)],
     contractDeployer
   )
 }
@@ -108,7 +115,6 @@ type SourcesTargetConfigsParams = {
   hopFactor: number
   minDcaThreshold: number
   maxDcaThreshold: number
-  strategyPrincipal: string
   maxSlipage: number
   isSourceNumerator?: boolean
 }
@@ -123,7 +129,6 @@ export const setSourcesTargetsConfig = ({
   hopFactor,
   minDcaThreshold,
   maxDcaThreshold,
-  strategyPrincipal,
   maxSlipage,
   isSourceNumerator = true
 }: SourcesTargetConfigsParams) => {
@@ -141,7 +146,6 @@ export const setSourcesTargetsConfig = ({
       Cl.bool(isSourceNumerator),
       Cl.uint(minDcaThreshold),
       Cl.uint(maxDcaThreshold),
-      Cl.principal(strategyPrincipal),
       Cl.uint(maxSlipage)
     ],
     contractDeployer
@@ -191,7 +195,8 @@ export const createDCA = ({
       Cl.uint(totalAmount ?? defaultTotalAmount),
       Cl.uint(dcaAmount ?? defaultDcaAmount),
       Cl.uint(minPrice ?? 0),
-      Cl.uint(maxPrice ?? maxUint128Value)
+      Cl.uint(maxPrice ?? maxUint128Value),
+      Cl.principal(defaultStrategyContract)
     ],
     address ?? address1
   )
@@ -216,6 +221,7 @@ export const addToPosition = (params: {
       Cl.principal(source),
       Cl.principal(target),
       Cl.uint(interval),
+      Cl.principal(defaultStrategyContract),
       Cl.uint(amount)
     ],
     address1
@@ -227,12 +233,14 @@ export const reducePosition = (params: {
   source?: string
   target?: string
   interval?: number
+  address?: string
 }) => {
   const {
     amount = 50_00000000,
     source = sourceToken,
     target = targetToken,
-    interval = INTERVALS.hours2
+    interval = INTERVALS.hours2,
+    address = address1
   } = params
   return simnet.callPublicFn(
     dcaManagerContract,
@@ -241,9 +249,10 @@ export const reducePosition = (params: {
       Cl.principal(source),
       Cl.principal(target),
       Cl.uint(interval),
+      Cl.principal(defaultStrategyContract),
       Cl.uint(amount)
     ],
-    address1
+    address
   )
 }
 
@@ -252,12 +261,14 @@ export const withdraw = (params: {
   source?: string
   target?: string
   interval?: number
+  address?: string
 }) => {
   const {
     amount = 200000,
     source = sourceToken,
     target = targetToken,
-    interval = INTERVALS.hours2
+    interval = INTERVALS.hours2,
+    address = address1
   } = params
   return simnet.callPublicFn(
     dcaManagerContract,
@@ -266,9 +277,10 @@ export const withdraw = (params: {
       Cl.principal(source),
       Cl.principal(target),
       Cl.uint(interval),
+      Cl.principal(defaultStrategyContract),
       Cl.uint(amount)
     ],
-    address1
+    address
   )
 }
 
@@ -291,7 +303,8 @@ export const dcaUsers = (
             user: Cl.principal(a),
             source: Cl.principal(source),
             target: Cl.principal(target),
-            interval: Cl.uint(interval)
+            interval: Cl.uint(interval),
+            strategy: Cl.principal(defaultStrategyContract)
           })
         )
       ),
@@ -315,7 +328,8 @@ export const getDcaData = (
       user: Cl.principal(user),
       source: Cl.principal(source),
       target: Cl.principal(target),
-      interval: Cl.uint(interval)
+      interval: Cl.uint(interval),
+      strategy: Cl.principal(defaultStrategyContract)
     })
   )
   // @ts-ignore
@@ -337,6 +351,7 @@ export const initDca = (
   addApproved(ammMockContract)
   addApproved(dcaManagerContract)
   addApproved(defaultStrategyContract)
+  addStrategy(defaultStrategyContract)
   setSourcesTargetsConfig({
     source,
     target,
@@ -347,7 +362,6 @@ export const initDca = (
     hopFactor: 0,
     minDcaThreshold: 0,
     maxDcaThreshold: maxUint128Value,
-    strategyPrincipal: defaultStrategyContract,
     maxSlipage: fourPercent,
     isSourceNumerator
   })

@@ -1,0 +1,72 @@
+---
+id: 0
+name: Mainnet deployment
+network: mainnet
+stacks-node: "https://api.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoin.blockstack.com:8332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        # - contract-publish:
+        #     contract-name: auth
+        #     expected-sender: SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN
+        #     cost: 835701
+        #     path: contracts/auth.clar
+        #     anchor-block-only: true
+        #     clarity-version: 2
+        - contract-publish:
+            contract-name: dca-vault
+            expected-sender: SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN
+            cost: 835701
+            path: contracts/dca-vault.clar
+            anchor-block-only: true
+            clarity-version: 2
+        # - contract-publish:
+        #     contract-name: strategy
+        #     expected-sender: SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN
+        #     cost: 835590
+        #     path: contracts/traits/strategy.clar
+        #     anchor-block-only: true
+        #     clarity-version: 2
+        - contract-publish:
+            contract-name: dca-manager
+            expected-sender: SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN
+            cost: 839336
+            path: contracts/dca-manager.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: default-strategy
+            expected-sender: SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN
+            cost: 835849
+            path: contracts/default-strategy.clar
+            anchor-block-only: true
+            clarity-version: 2
+      epoch: "2.4"
+    - id: 1
+      transactions:
+        - contract-call:
+            contract-id: SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN.auth
+            expected-sender: SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN
+            method: add-approved
+            parameters:
+              - "'SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN"
+            cost: 5960
+            clarity-version: 2
+        - contract-call:
+            contract-id: SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN.auth
+            expected-sender: SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN
+            method: add-approved
+            parameters:
+              - "'SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN.dca-manager"
+            cost: 5960
+            clarity-version: 2
+        - contract-call:
+            contract-id: SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN.auth
+            expected-sender: SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN
+            method: add-approved
+            parameters:
+              - "'SP3XZG3JKX58XC3DN1PQGSYJDYMSKM55RM43V6SN"
+            cost: 5960
+            clarity-version: 2

@@ -42,15 +42,20 @@ path = 'contracts/default-strategy.clar'
 clarity_version = 2
 epoch = 2.4
 
+[contracts.strategy]
+path = 'contracts/traits/strategy.clar'
+clarity_version = 2
+epoch = 2.4
+
 [contracts.mock-alex]
 path = 'contracts/mocks/mock-alex.clar'
 clarity_version = 2
 epoch = 2.4
 
-[contracts.mock-velar]
-path = 'contracts/mocks/mock-velar.clar'
-clarity_version = 2
-epoch = 2.4
+# [contracts.mock-velar]
+# path = 'contracts/mocks/mock-velar.clar'
+# clarity_version = 2
+# epoch = 2.4
 
 [contracts.sbtc]
 path = 'contracts/tokens/sbtc.clar'
@@ -59,16 +64,6 @@ epoch = 2.4
 
 [contracts.sip-010-trait]
 path = 'contracts/traits/sip-010-trait.clar'
-clarity_version = 2
-epoch = 2.4
-
-[contracts.strategy]
-path = 'contracts/traits/strategy.clar'
-clarity_version = 2
-epoch = 2.4
-
-[contracts.swap-router]
-path = 'contracts/swap-router.clar'
 clarity_version = 2
 epoch = 2.4
 
@@ -82,8 +77,8 @@ path = 'contracts/tokens/wusd.clar'
 clarity_version = 2
 epoch = 2.4
 
-[contracts.wusd-6]
-path = 'contracts/wusd-6.clar'
+[contracts.wstx]
+path = 'contracts/tokens/wstx.clar'
 clarity_version = 2
 epoch = 2.4
 
