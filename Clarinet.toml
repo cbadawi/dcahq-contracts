@@ -22,6 +22,13 @@ contract_id = 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-share-fee-to'
 
 [[project.requirements]]
 contract_id = 'SP2AKWJYC7BNY18W1XXKPGP0YVEK63QJG4793Z2D4.sip-010-trait-ft-standard'
+
+[[project.requirements]]
+contract_id = 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-core'
+
+[[project.requirements]]
+contract_id = 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-library'
+
 [contracts.auth]
 path = 'contracts/auth.clar'
 clarity_version = 2
@@ -42,20 +49,15 @@ path = 'contracts/default-strategy.clar'
 clarity_version = 2
 epoch = 2.4
 
-[contracts.strategy]
-path = 'contracts/traits/strategy.clar'
-clarity_version = 2
-epoch = 2.4
-
 [contracts.mock-alex]
 path = 'contracts/mocks/mock-alex.clar'
 clarity_version = 2
 epoch = 2.4
 
-# [contracts.mock-velar]
-# path = 'contracts/mocks/mock-velar.clar'
-# clarity_version = 2
-# epoch = 2.4
+[contracts.mock-velar]
+path = 'contracts/mocks/mock-velar.clar'
+clarity_version = 2
+epoch = 2.4
 
 [contracts.sbtc]
 path = 'contracts/tokens/sbtc.clar'
@@ -67,8 +69,18 @@ path = 'contracts/traits/sip-010-trait.clar'
 clarity_version = 2
 epoch = 2.4
 
+[contracts.strategy]
+path = 'contracts/traits/strategy.clar'
+clarity_version = 2
+epoch = 2.4
+
 [contracts.welsh]
 path = 'contracts/tokens/welsh.clar'
+clarity_version = 2
+epoch = 2.4
+
+[contracts.wstx]
+path = 'contracts/tokens/wstx.clar'
 clarity_version = 2
 epoch = 2.4
 
@@ -77,8 +89,8 @@ path = 'contracts/tokens/wusd.clar'
 clarity_version = 2
 epoch = 2.4
 
-[contracts.wstx]
-path = 'contracts/tokens/wstx.clar'
+[contracts.wusd-6]
+path = 'contracts/tokens/wusd-6.clar'
 clarity_version = 2
 epoch = 2.4
 

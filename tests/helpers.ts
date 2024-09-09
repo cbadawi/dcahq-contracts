@@ -58,6 +58,8 @@ export const dcaVaultContract = contractDeployer + ".dca-vault"
 export const authContract = contractDeployer + ".auth"
 export const ammMockContract = contractDeployer + ".mock-alex"
 export const defaultStrategyContract = contractDeployer + ".default-strategy"
+export const shareFeeToContract =
+  "SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-share-fee-to"
 
 export const sourceToken = contractDeployer + ".wusd"
 export const targetToken = contractDeployer + ".sbtc"
@@ -132,6 +134,7 @@ export const setSourcesTargetsConfig = ({
   maxSlipage,
   isSourceNumerator = true
 }: SourcesTargetConfigsParams) => {
+  console.log({ feeFixed })
   return simnet.callPublicFn(
     dcaManagerContract,
     "set-sources-targets-config",
@@ -284,7 +287,7 @@ export const withdraw = (params: {
   )
 }
 
-export const dcaUsers = (
+export const dcaUsersA = (
   source: string,
   target: string,
   addresses: string[],
@@ -293,10 +296,8 @@ export const dcaUsers = (
 ) => {
   return simnet.callPublicFn(
     dcaManagerContract,
-    "dca-users",
+    "dca-users-a",
     [
-      Cl.principal(source),
-      Cl.principal(target),
       Cl.list(
         addresses.map(a =>
           Cl.tuple({
@@ -309,7 +310,43 @@ export const dcaUsers = (
         )
       ),
       Cl.principal(defaultStrategyContract),
+      Cl.principal(source),
+      Cl.principal(target),
       helperTrait ? Cl.principal(helperTrait) : Cl.none()
+    ],
+    address1
+  )
+}
+
+export const dcaUsersB = (
+  source: string,
+  target: string,
+  addresses: string[],
+  interval: INTERVALS,
+  targetAmountOut: number
+) => {
+  return simnet.callPublicFn(
+    dcaManagerContract,
+    "dca-users-b",
+    [
+      Cl.principal(defaultStrategyContract),
+      Cl.principal(source),
+      Cl.principal(target),
+      Cl.principal(source),
+      Cl.principal(target),
+      Cl.principal(shareFeeToContract),
+      Cl.tuple({ "target-amount-out": Cl.uint(targetAmountOut) }),
+      Cl.list(
+        addresses.map(a =>
+          Cl.tuple({
+            user: Cl.principal(a),
+            source: Cl.principal(source),
+            target: Cl.principal(target),
+            interval: Cl.uint(interval),
+            strategy: Cl.principal(defaultStrategyContract)
+          })
+        )
+      )
     ],
     address1
   )

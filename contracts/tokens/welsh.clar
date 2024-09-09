@@ -72,7 +72,7 @@
 ;; @desc get-decimals
 ;; @returns (response uint)
 (define-read-only (get-decimals)
-   	(ok u6)
+    (ok u6)
 )
 
 ;; @desc get-balance

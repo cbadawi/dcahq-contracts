@@ -8,7 +8,7 @@ import {
   createDCA,
   getDcaData,
   dcaManagerContract,
-  dcaUsers,
+  dcaUsersA,
   dcaVaultContract,
   ERR_INVALID_AMOUNT,
   ERR_INVALID_INTERVAL,
@@ -34,7 +34,8 @@ import {
   defaultStrategyContract,
   defaultSourcesTokenConfig,
   addStrategy,
-  maxUint128Value
+  maxUint128Value,
+  dcaUsersB
 } from "./helpers"
 import { boolCV, Cl } from "@stacks/transactions"
 
@@ -184,7 +185,7 @@ import { boolCV, Cl } from "@stacks/transactions"
 //   })
 
 //   it("updates source & target in dca-data map", () => {
-//     const dcausers = dcaUsers(
+//     const dcausers = dcaUsersA(
 //       sourceToken,
 //       targetToken,
 //       [address1],
@@ -205,7 +206,7 @@ import { boolCV, Cl } from "@stacks/transactions"
 //   })
 
 //   it("one user fails with invalid price while the other passes", () => {
-//     const resp = dcaUsers(
+//     const resp = dcaUsersA(
 //       sourceToken,
 //       targetToken,
 //       [address1, address2],
@@ -228,7 +229,7 @@ import { boolCV, Cl } from "@stacks/transactions"
 //       ...defaultSourcesTokenConfig,
 //       feeFixed: feeAmount
 //     })
-//     const resp = dcaUsers(
+//     const resp = dcaUsersA(
 //       sourceToken,
 //       targetToken,
 //       [address1, address2, address3],
@@ -253,7 +254,7 @@ import { boolCV, Cl } from "@stacks/transactions"
 //       feeFixed: feeAmount,
 //       feePercent: feePercentage
 //     })
-//     const secondResp = dcaUsers(
+//     const secondResp = dcaUsersA(
 //       sourceToken,
 //       targetToken,
 //       [address1],
@@ -292,7 +293,7 @@ import { boolCV, Cl } from "@stacks/transactions"
 //     false
 //   )
 
-//   const resp = dcaUsers(wusd6Token, welsh6Token, [address3], INTERVALS.hours2)
+//   const resp = dcaUsersA(wusd6Token, welsh6Token, [address3], INTERVALS.hours2)
 //   logResponse(resp)
 //   const event = Cl.prettyPrint(resp.events[2].data.value!)
 //   const priceMatch = event.match(/, price:\s*u(\d+)/)
@@ -321,7 +322,7 @@ import { boolCV, Cl } from "@stacks/transactions"
 //     false
 //   )
 
-//   const resp = dcaUsers(wusd6Token, welsh6Token, [address3], INTERVALS.hours2)
+//   const resp = dcaUsersA(wusd6Token, welsh6Token, [address3], INTERVALS.hours2)
 
 //   const event = Cl.prettyPrint(resp.events[4].data.value!)
 //   const priceMatch = event.match(/, price:\s*u(\d+)/)
@@ -335,7 +336,7 @@ import { boolCV, Cl } from "@stacks/transactions"
 //   beforeEach(() => {
 //     const initresp = initDca(address1, 0)
 //     logResponse(initresp, "initresp ")
-//     const dcauserss = dcaUsers(
+//     const dcauserss = dcaUsersA(
 //       sourceToken,
 //       targetToken,
 //       [address1],
@@ -344,44 +345,44 @@ import { boolCV, Cl } from "@stacks/transactions"
 //     logResponse(dcauserss, "dca users ")
 //   })
 
-// it("prevents unauthorized withdraw", () => {
-//   const amount = 100_00000000
-//   mintSourceToken(address1, amount)
-//   const resp = withdraw({
-//     amount,
-//     source: sourceToken,
-//     target: targetToken,
-//     interval: INTERVALS.hours2,
-//     address: address2
+//   it("prevents unauthorized withdraw", () => {
+//     const amount = 100_00000000
+//     mintSourceToken(address1, amount)
+//     const resp = withdraw({
+//       amount,
+//       source: sourceToken,
+//       target: targetToken,
+//       interval: INTERVALS.hours2,
+//       address: address2
+//     })
+//     expect(resp.result).toBeErr(ERR_INVALID_KEY)
 //   })
-//   expect(resp.result).toBeErr(ERR_INVALID_KEY)
-// })
 
-// it("prevents unauthorized reduce position", () => {
-//   const amount = 100_00000000
-//   // mintSourceToken(address1, amount)
-//   const resp = reducePosition({
-//     amount,
-//     source: sourceToken,
-//     target: targetToken,
-//     interval: INTERVALS.hours2,
-//     address: address2
+//   it("prevents unauthorized reduce position", () => {
+//     const amount = 100_00000000
+//     // mintSourceToken(address1, amount)
+//     const resp = reducePosition({
+//       amount,
+//       source: sourceToken,
+//       target: targetToken,
+//       interval: INTERVALS.hours2,
+//       address: address2
+//     })
+//     logResponse(resp)
+//     expect(resp.result).toBeErr(ERR_INVALID_KEY)
 //   })
-//   logResponse(resp)
-//   expect(resp.result).toBeErr(ERR_INVALID_KEY)
-// })
 
-// it("allows authorized withdraw", () => {
-//   const amount = defaultTotalAmount
-//   const resp = withdraw({
-//     amount,
-//     source: sourceToken,
-//     target: targetToken,
-//     interval: INTERVALS.hours2,
-//     address: address1
+//   it("allows authorized withdraw", () => {
+//     const amount = defaultTotalAmount
+//     const resp = withdraw({
+//       amount,
+//       source: sourceToken,
+//       target: targetToken,
+//       interval: INTERVALS.hours2,
+//       address: address1
+//     })
+//     expect(resp.result).toStrictEqual(Cl.ok(Cl.bool(true)))
 //   })
-//   expect(resp.result).toStrictEqual(Cl.ok(Cl.bool(true)))
-// })
 
 //   it("allows authorized reduce position", () => {
 //     const resp = reducePosition({
@@ -403,7 +404,7 @@ import { boolCV, Cl } from "@stacks/transactions"
 //   })
 
 //   it("updates target-amount and source-amount-left correctly", () => {
-//     const dcausersResp = dcaUsers(
+//     const dcausersResp = dcaUsersA(
 //       sourceToken,
 //       targetToken,
 //       [address1, address2],
@@ -443,33 +444,160 @@ import { boolCV, Cl } from "@stacks/transactions"
 //     expect(dcaDataAddress1["last-updated-timestamp"]).toBeDefined()
 //     expect(dcaDataAddress2["last-updated-timestamp"]).toBeDefined()
 //   })
-// it("fails for invalid price while updating the second user", () => {
-//   // Simulate different price scenarios for different users
-//   const dcausersResp = dcaUsers(
-//     sourceToken,
-//     targetToken,
-//     [address1, address3],
-//     INTERVALS.hours2
-//   )
+//   it("fails for invalid price while updating the second user", () => {
+//     // Simulate different price scenarios for different users
+//     const dcausersResp = dcaUsersA(
+//       sourceToken,
+//       targetToken,
+//       [address1, address3],
+//       INTERVALS.hours2
+//     )
 
-//   logResponse(dcausersResp, "dca users with invalid price")
+//     logResponse(dcausersResp, "dca users with invalid price")
 
-//   const [firstUserResponse, secondUserResponse] =
-//     // @ts-ignore
-//     dcausersResp.result.value.list
+//     const [firstUserResponse, secondUserResponse] =
+//       // @ts-ignore
+//       dcausersResp.result.value.list
 
-//   // First user should succeed
-//   expect(firstUserResponse.value).toBeGreaterThan(0)
+//     // First user should succeed
+//     expect(firstUserResponse.value).toBeGreaterThan(0)
 
-//   // Second user should fail due to invalid price
-//   expect(Number(secondUserResponse.value)).toBe(0)
+//     // Second user should fail due to invalid price
+//     expect(Number(secondUserResponse.value)).toBe(0)
+//   })
 // })
-// })
 
-describe("test wstsx", () => {
+describe("velar", () => {
   beforeEach(() => {
-    initDca(address1, 0)
-    initDca(address2, 0, 2000_00000000, 200_00000000)
+    const poolid = 10
+    initDca(
+      address1,
+      poolid,
+      1000_00000000,
+      defaultDcaAmount,
+      0,
+      999999999999999,
+      wusd6Token,
+      welsh6Token,
+      false
+    )
+    initDca(
+      address2,
+      poolid,
+      200_00000000,
+      20_00000000,
+      0,
+      999999999999999,
+      wusd6Token,
+      welsh6Token,
+      false
+    )
+    initDca(
+      address3,
+      poolid,
+      300_00000000,
+      30_00000000,
+      0,
+      0,
+      wusd6Token,
+      welsh6Token,
+      false
+    )
   })
-  it("should transfer stx and wstx", () => {})
+
+  it("updates source & target in dca-data map", () => {
+    const targetAmount = 1000
+    const dcausers = dcaUsersB(
+      wusd6Token,
+      welsh6Token,
+      [address1],
+      INTERVALS.hours2,
+      targetAmount
+    )
+
+    const dcaData = getDcaData(
+      address1,
+      wusd6Token,
+      welsh6Token,
+      INTERVALS.hours2
+    )
+    expect(dcaData["source-amount-left"]).toStrictEqual(
+      Cl.uint(defaultTotalAmount - defaultDcaAmount)
+    )
+    expect(dcaData["target-amount"].value).toBeGreaterThan(0)
+  })
+
+  it("one user fails with invalid price while the other passes", () => {
+    const resp = dcaUsersB(
+      wusd6Token,
+      welsh6Token,
+      [address1, address3],
+      INTERVALS.hours2,
+      100000
+    )
+    logResponse(resp, "dca users")
+    // @ts-ignore
+    const [firstResp, secondResp] = resp.result.value.list
+    expect(firstResp.value).toBeGreaterThan(0)
+    expect(Number(secondResp.value)).toBe(0) // invalid price
+  })
+
+  it("adds correct fee to treasury", () => {
+    const feeAmount = 1000000 // 1 usd
+    const setSourcesTargetsConfigresp = setSourcesTargetsConfig({
+      ...defaultSourcesTokenConfig,
+      source: wusd6Token,
+      target: welsh6Token,
+      feeFixed: feeAmount
+    })
+    logResponse(setSourcesTargetsConfigresp, "setSourcesTargetsConfigresp")
+    const resp = dcaUsersB(
+      wusd6Token,
+      welsh6Token,
+      [address1, address2, address3],
+      INTERVALS.hours2,
+      100000
+    )
+    const fee = simnet.callReadOnlyFn(
+      dcaManagerContract,
+      "get-fee",
+      [Cl.principal(wusd6Token)],
+      address2
+    )
+    logResponse(resp, "first dca")
+    console.log({ fee })
+    // @ts-ignore
+    const fixedFeeValue = fee.result.value as bigint
+    expect(fixedFeeValue).toBe(BigInt(feeAmount * 2))
+
+    simnet.mineEmptyBlocks(10)
+    const feePercentage = 5 * 100000
+    const expectedFeePercAmount = (defaultDcaAmount * feePercentage) / 10 ** 8
+    setSourcesTargetsConfig({
+      ...defaultSourcesTokenConfig,
+      feeFixed: feeAmount,
+      feePercent: feePercentage,
+      source: wusd6Token,
+      target: welsh6Token
+    })
+    const secondResp = dcaUsersB(
+      wusd6Token,
+      welsh6Token,
+      [address1],
+      INTERVALS.hours2,
+      10000
+    )
+    const totalFee = simnet.callReadOnlyFn(
+      dcaManagerContract,
+      "get-fee",
+      [Cl.principal(wusd6Token)],
+      address2
+    )
+    const expectedTotalFee =
+      Number(fixedFeeValue) + feeAmount + expectedFeePercAmount
+    logResponse(secondResp, "second dca")
+    // @ts-ignore
+    const finalFeeValue = totalFee.result.value as bigint
+    expect(Number(finalFeeValue)).toBe(expectedTotalFee)
+  })
 })

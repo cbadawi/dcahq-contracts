@@ -1,4 +1,6 @@
-(use-trait ft-trait 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-sip-010.sip-010-trait)
+(use-trait ft-trait-a 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-sip-010.sip-010-trait)
+(use-trait ft-trait-b 'SP2AKWJYC7BNY18W1XXKPGP0YVEK63QJG4793Z2D4.sip-010-trait-ft-standard.sip-010-trait)
+(use-trait share-fee-to-trait 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-share-fee-to-trait.share-fee-to-trait)
 (use-trait strategy-trait  .strategy.default-strategy)
 
 (define-constant ERR-NOT-AUTHORIZED (err u9999))
@@ -11,6 +13,7 @@
 (define-constant ERR-CONFIG-NOT-SET (err u9007))
 (define-constant ERR-FETCHING-PRICE (err u9008))
 (define-constant ERR-INVALID-STRATEGY (err u9009))
+(define-constant ERR-MAX-POSITIONS-EXCEEDED (err u9010))
 
 (define-constant ONE_8 u100000000) ;; 8 decimal places
 
@@ -28,6 +31,10 @@
 															max-slippage: uint
 															})
 
+(define-map user-keys { user: principal }
+											(list 1000 {source:principal, target:principal, interval:uint, strategy: principal})
+)
+
 (define-map approved-startegies principal bool)
 
 (define-map fee-map { source: principal } { fee: uint })
@@ -36,8 +43,8 @@
 												source: principal,
 												target: principal,
 												interval: uint,
-												strategy: principal ;; a user can have multiple strategies on the same source-target combination
-												 } 
+												;; a user can have multiple strategies on the same source-target combination
+												strategy: principal} 
 											{ is-paused: bool,
 												amount: uint, ;; amount per dca
 												source-amount-left: uint,
@@ -74,7 +81,7 @@
 (define-public (set-sources-targets-config (source principal) (target principal) (id uint) (fee-fixed uint) (fee-percent uint) (source-factor uint) (helper-factor uint) (is-source-numerator bool) (min-dca-threshold uint) (max-dca-threshold uint) (max-slippage uint)) 
 	(let ((value {id:id, fee-fixed:fee-fixed, fee-percent:fee-percent, source-factor: source-factor, helper-factor:helper-factor, is-source-numerator:is-source-numerator, min-dca-threshold: min-dca-threshold, max-dca-threshold: max-dca-threshold, max-slippage: max-slippage})) 		
 		(asserts! (is-approved) ERR-NOT-AUTHORIZED) 
-		(print {function:"set-sources-targets-config", params: value})
+		(print {function:"set-sources-targets-config", params: value, source:source, target:target})
 		(ok (map-set sources-targets-config {source: source, target: target} value))
 ))
 
@@ -83,10 +90,25 @@
 		(asserts! (is-approved) ERR-NOT-AUTHORIZED) 
 		(ok (map-set approved-startegies strat status))
 ))
+
+(define-private (set-new-user-key (user principal) 
+														(source principal) 
+														(target principal)
+														(interval uint)
+														(strategy principal))
+	(let ((key-opt (map-get? user-keys {user: user}))
+					) 
+					(ok (match key-opt key 
+					(map-set user-keys {user:user}  
+															(concat 
+																	(unwrap! (as-max-len? key u999) ERR-MAX-POSITIONS-EXCEEDED)  
+																	(list {source:source, target:target, interval:interval, strategy: strategy})))
+					(map-insert user-keys {user: user} (list {source:source, target:target, interval:interval, strategy: strategy}))				
+))))
 ;; --------------------------------------------------------------------------
 ;; ----------------------------------------DCA---------------------------------------------
 ;; ----------------------------------------------------------------------------------------
-(define-public (create-dca  (source-trait <ft-trait>) 
+(define-public (create-dca  (source-trait <ft-trait-b>) 
 														(target principal)
 														(interval uint)
 														(total-amount uint)
@@ -105,13 +127,14 @@
 		(unwrap! (map-get? interval-id-to-seconds {interval: interval}) ERR-INVALID-INTERVAL)
 		(unwrap! (map-get? approved-startegies strategy) ERR-INVALID-STRATEGY)
 		(asserts! (map-insert dca-data {user:sender, source:source, target:target, interval:interval, strategy: strategy} data) ERR-DCA-ALREADY-EXISTS)
-		(print {function: "create-dca", 
+		(try! (set-new-user-key sender source target interval strategy))
+		(print {function: "creae-dca", 
 						input: {user: sender, source-trait: source-trait, target:target, interval:interval, total-amount:total-amount, dca-amount:dca-amount, min-price:min-price, max-price: max-price},
 						more: {more: data }})
 		(contract-call? source-trait transfer total-amount sender .dca-vault none)
 ))
 
-(define-public (add-to-position (source-trait <ft-trait>) (target principal) (interval uint) (strategy principal) (amount uint)) 
+(define-public (add-to-position (source-trait <ft-trait-b>) (target principal) (interval uint) (strategy principal) (amount uint)) 
 	(let (
 			(sender tx-sender)
 			(source (contract-of source-trait))
@@ -125,7 +148,7 @@
 		(ok (map-set dca-data {user:sender, source:source, target:target, interval:interval, strategy: strategy} (merge data {source-amount-left: (+ amount prev-amount)})))
 ))
 
-(define-public (reduce-position (source-trait <ft-trait>) (target principal) (interval uint) (strategy principal) (amount uint)) 
+(define-public (reduce-position (source-trait <ft-trait-b>) (target principal) (interval uint) (strategy principal) (amount uint)) 
 	(let (
 			(sender tx-sender)
 			(source (contract-of source-trait))
@@ -141,7 +164,7 @@
 		(ok (map-set dca-data {user:sender, source:source, target:target, interval:interval, strategy: strategy} (merge data {source-amount-left: (- prev-amount amount-to-reduce)})))
 ))
 
-(define-public (withdraw (source principal) (target-trait <ft-trait>) (interval uint) (strategy principal) (amount uint)) 
+(define-public (withdraw (source principal) (target-trait <ft-trait-b>) (interval uint) (strategy principal) (amount uint)) 
 	(let ((sender tx-sender)
 		(target (contract-of target-trait))
 		(data (unwrap! (get-dca-data sender source target interval strategy) ERR-INVALID-KEY))
@@ -156,11 +179,12 @@
 	(ok (map-set dca-data {user:sender, source:source, target:target, interval:interval, strategy: strategy} (merge data {target-amount: (- prev-amount amount-to-withdraw)})))
 ))
 
-(define-public (dca-users (source-trait <ft-trait>)
-												 	(target-trait <ft-trait>)
-													(keys (list 20 {user:principal, source:principal, target:principal, interval:uint, strategy: principal}))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define-public (dca-users-a (keys (list 20 {user:principal, source:principal, target:principal, interval:uint, strategy: principal}))
 													(dca-strategy <strategy-trait>)
-													(helper-trait (optional <ft-trait>))
+													(source-trait <ft-trait-a>)
+													(target-trait <ft-trait-a>)
+													(helper-trait (optional <ft-trait-a>))
 													)
 		(let ((source (contract-of source-trait))
 					(target (contract-of target-trait))
@@ -172,11 +196,12 @@
 																keys
 																curr-timestamp-list
 													))
-					(agg-amounts (fold aggregate-amounts user-amounts {total-amount:u0, fee:u0}))
+						)
+					(print {user-amounts: user-amounts})
+					(let ((agg-amounts (fold aggregate-amounts user-amounts {total-amount:u0, fee:u0}))
 					(source-total-amount (get total-amount agg-amounts))
 					(fee (get fee agg-amounts))
 					(source-target-map (unwrap! (map-get? sources-targets-config {source: source, target: target}) ERR-INVALID-PRINCIPAL))
-					(id (get id source-target-map))
 					(is-source-numerator (get is-source-numerator source-target-map))
 					(source-factor (get source-factor source-target-map))
 					(helper-factor (get helper-factor source-target-map))
@@ -186,23 +211,88 @@
 					(min-dy (mul-down amount-dy max-slippage))
 				) 
 				(if (is-eq source-total-amount u0) (ok (list u0)) 
-				(begin 
-					(try! (as-contract (contract-call? .dca-vault transfer-ft source-trait source-total-amount (contract-of dca-strategy))))
-					(let (
-							(target-total-amount (as-contract (try! (contract-call? dca-strategy swap-wrapper source-trait target-trait source-factor source-total-amount min-dy id helper-factor helper-trait))))
-							)
-							(print { function:"dca-users", 
-											input: {source:source-trait, target:target-trait, keys:keys, dca-strategy:dca-strategy, helper-tait:helper-trait},
-											more: {agg-amounts:agg-amounts, user-amounts:user-amounts, amount-dy:amount-dy, min-dy:min-dy, target-total-amount:target-total-amount} })
-							(add-fee fee source)
-							(ok (map set-new-target-amount (list source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount)
-																					(list target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount)
-																					curr-timestamp-list
-																					user-amounts
-																					))
-)))))
+					(begin 
+						(try! (as-contract (contract-call? .dca-vault transfer-ft source-trait source-total-amount (contract-of dca-strategy))))
+						(let (
+								(target-total-amount (as-contract (try! (contract-call? dca-strategy alex-swap-wrapper source-trait target-trait source-factor source-total-amount min-dy helper-factor helper-trait))))
+								)
+								(print { function:"dca-users", 
+												input: {source:source-trait, target:target-trait, keys:keys, dca-strategy:dca-strategy, helper-tait:helper-trait},
+												more: {source-target-map:source-target-map, agg-amounts:agg-amounts, amount-dy:amount-dy, min-dy:min-dy, target-total-amount:target-total-amount} })
+								(add-fee fee source)
+								(ok (map set-new-target-amount (list source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount)
+																						(list target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount)
+																						curr-timestamp-list
+																						user-amounts
+																						))
+))))))
 
-(define-private (set-new-target-amount (source-total-amount uint)
+(define-private (dca-user (source-trait <ft-trait-a>)
+													(target-trait <ft-trait-a>)
+													(helper-trait (optional <ft-trait-a>))
+													(key (tuple (user principal) (source principal) (target principal) (interval uint) (strategy principal))) 
+													(curr-timestamp uint))
+	(let ((user (get user key))
+				(source (get source key))
+				(target (get target key))
+				(interval (get interval key))
+				(strategy (get strategy key))
+				(data (unwrap! (get-dca-data user source target interval strategy) ERR-INVALID-KEY))
+				(source-amount-left (get source-amount-left data))
+				(amount (get amount data))
+				(target-amount (get target-amount data))
+				(last-updated-timestamp (get last-updated-timestamp data))
+				(min-price (get min-price data))
+				(max-price (get max-price data))
+				(interval-seconds (unwrap! (get-interval-seconds interval) ERR-INVALID-INTERVAL))
+				(target-timestamp (+ (get seconds interval-seconds) last-updated-timestamp))
+				) 
+				(print {function: "dca-user", 
+								input: {user: user, source: source, target: target, interval: interval, curr-timestamp: curr-timestamp},
+								more: {amount: amount, interval-secoinds: interval-seconds, target-timestamp: target-timestamp}})
+				(asserts! (is-eq (contract-of source-trait) source) ERR-INVALID-PRINCIPAL)
+				(asserts! (is-eq (contract-of target-trait) target) ERR-INVALID-PRINCIPAL)
+				(if (>= curr-timestamp target-timestamp)
+						(process-swap source target helper-trait user amount min-price max-price source-amount-left interval strategy)
+						(ok {amount-minus-fee: u0, fee: u0, key: none})
+)))
+
+(define-private (process-swap (source principal)
+															(target principal)
+															(helper-trait (optional <ft-trait-a>))
+															(user principal)
+															(dca-amount uint)
+															(min-price uint)
+															(max-price uint)
+															(source-amount-left uint)
+															(interval uint)
+															(strategy principal)
+															) 
+		(let ((source-target-config (unwrap! (map-get? sources-targets-config {source: source, target: target}) ERR-CONFIG-NOT-SET))
+				(amount-to-trade (if (< source-amount-left dca-amount) source-amount-left dca-amount))
+				(is-source-numerator (get is-source-numerator source-target-config))
+				(source-factor (get source-factor source-target-config))
+				(helper-factor (get helper-factor source-target-config))
+				(fee-fixed (get fee-fixed source-target-config))
+				(fee-percent (get fee-percent source-target-config))
+				(amount-and-fee (get-amount-and-fee amount-to-trade source fee-fixed fee-percent))
+				(price (try! (get-price source target source-factor is-source-numerator helper-trait (some helper-factor))))
+			)
+		(print {function: "process-swap", 
+						input:{ source:source, target:target, user:user, dca-amount:dca-amount, source-amount-left:source-amount-left, interval:interval, max-price:max-price, min-price:min-price},
+						more:{ amount-to-trade:amount-to-trade, price:price, amount-and-fee: amount-and-fee }})
+		(asserts! (and (<= price max-price) (>= price min-price)) ERR-INVALID-PRICE)
+		(ok (merge amount-and-fee {key:(some {user:user, source:source, target:target, interval:interval, strategy: strategy})})
+)))
+
+(define-private (get-amount-and-fee  (amount-to-trade uint) (source principal) (fee-fixed uint) (fee-percent uint)) 
+	(let ((fee (calc-fees amount-to-trade source fee-fixed fee-percent))
+				(amount-minus-fee (- amount-to-trade fee))
+			) 
+			{amount-minus-fee: amount-minus-fee, fee: fee}				
+))
+
+(define-private (set-new-target-amount (source-total-amount uint) ;; u9999500000
 																			(target-total-amount uint)
 																			(curr-timestamp uint) 
 																			(user-dca-amount-resp (response (tuple (amount-minus-fee uint) (fee uint) (key (optional (tuple (interval uint) (source principal) (target principal) (user principal) (strategy principal))))) uint))
@@ -213,8 +303,8 @@
 							(source-amount-left (get source-amount-left data))
 							(target-amount (get target-amount data))
 							(amount-minus-fee (get amount-minus-fee user-dca-amount))
-							(fee (get fee user-dca-amount))
-							(source-amount-traded (+ fee amount-minus-fee)) 
+							(fee (get fee user-dca-amount))								
+							(source-amount-traded (+ fee amount-minus-fee))  ;; u10000000000
 							(target-amount-traded (mul-down (div-down source-amount-traded source-total-amount) target-total-amount))
 						)
 						(map-set dca-data key (merge data {last-updated-timestamp: curr-timestamp, 
@@ -239,79 +329,16 @@
 	{total-amount: (+ curr-amount-minus-fee prev-amount-minus-fee), fee: (+ curr-fee prev-fee)}
 ))
 
-(define-private (dca-user (source-trait <ft-trait>)
-													(target-trait <ft-trait>)
-													(helper-trait (optional <ft-trait>))
-													(key (tuple (user principal) (source principal) (target principal) (interval uint) (strategy principal))) 
-													(curr-timestamp uint))
-	(let ((user (get user key))
-				(source (get source key))
-				(target (get target key))
-				(interval (get interval key))
-				(strategy (get strategy key))
-				(data (unwrap! (get-dca-data user source target interval strategy) ERR-INVALID-KEY))
-				(source-amount-left (get source-amount-left data))
-				(amount (get amount data))
-				(target-amount (get target-amount data))
-				(last-updated-timestamp (get last-updated-timestamp data))
-				(min-price (get min-price data))
-				(max-price (get max-price data))
-				(interval-seconds (unwrap! (get-interval-seconds interval) ERR-INVALID-INTERVAL))
-				(target-timestamp (+ (get seconds interval-seconds) last-updated-timestamp))
-				) 
-				(print {function: "dca-user", 
-								input: {user: user, source: source, target: target, interval: interval, curr-timestamp: curr-timestamp},
-								more: {amount: amount, interval-secoinds: interval-seconds, target-timestamp: target-timestamp}})
-				(asserts! (is-eq (contract-of source-trait) source) ERR-INVALID-PRINCIPAL)
-				(asserts! (is-eq (contract-of target-trait) target) ERR-INVALID-PRINCIPAL)
-				(if (>= curr-timestamp target-timestamp)
-						(process-swap source target source-trait target-trait helper-trait user amount min-price max-price source-amount-left interval curr-timestamp target-amount strategy)
-						(ok {amount-minus-fee: u0, fee: u0, key: none})
-)))
-
-(define-private (process-swap (source principal)
-															(target principal)
-															(source-trait <ft-trait>)
-															(target-trait <ft-trait>) 
-															(helper-trait (optional <ft-trait>))
-															(user principal)
-															(amount uint)
-															(min-price uint)
-															(max-price uint)
-															(source-amount-left uint)
-															(interval uint)
-															(curr-timestamp uint)
-															(target-amount uint)
-															(strategy principal)
-															) 
-		(let ((source-target-map (unwrap! (map-get? sources-targets-config {source: source, target: target}) ERR-CONFIG-NOT-SET))
-				(amount-to-trade (if (< source-amount-left amount) source-amount-left amount))
-				(is-source-numerator (get is-source-numerator source-target-map))
-				(source-factor (get source-factor source-target-map))
-				(helper-factor (get helper-factor source-target-map))
-				(fee-fixed (get fee-fixed source-target-map))
-				(fee-percent (get fee-percent source-target-map))
-				(fee (calc-fees amount-to-trade source fee-fixed fee-percent))
-				(amount-minus-fee (- amount-to-trade fee))
-				(price (try! (get-price source target source-factor is-source-numerator helper-trait (some helper-factor))))
-			)
-		(print {function: "process-swap", 
-						input:{ curr-timestamp:curr-timestamp, source:source, target:target, user:user, amount:amount, source-amount-left:source-amount-left, interval:interval, target-amount:target-amount, max-price:max-price, min-price:min-price},
-						more:{ amount-to-trade:amount-to-trade, price:price, fee:fee, amount-minus-fee:amount-minus-fee }})
-		(asserts! (and (<= price max-price) (>= price min-price)) ERR-INVALID-PRICE)
-		(ok {amount-minus-fee: amount-minus-fee, fee: fee, key:(some {user:user, source:source, target:target, interval:interval, strategy: strategy})})
-))
-
-(define-private (get-price (source principal) (target principal) (source-factor uint) (is-source-numerator bool) (helper-trait-opt (optional <ft-trait>)) (helper-factor (optional uint)))
+(define-private (get-price (source principal) (target principal) (source-factor uint) (is-source-numerator bool) (helper-trait-opt (optional <ft-trait-a>)) (helper-factor (optional uint)))
 	(match helper-trait-opt helper-trait (get-price-hop source target source-factor helper-trait (unwrap-panic helper-factor) is-source-numerator)  
 																								(get-price-internal source target source-factor))
 )
 
 (define-private (get-price-internal (token-x principal) (token-y principal) (factor uint)) 
-	 (contract-call? .mock-alex get-price token-x token-y factor)
+		(contract-call? 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01 get-price token-x token-y factor)
 )
 
-(define-private (get-price-hop (source principal) (target principal) (source-factor uint) (helper-trait <ft-trait>) (helper-factor uint) (is-source-numerator bool)) 
+(define-private (get-price-hop (source principal) (target principal) (source-factor uint) (helper-trait <ft-trait-a>) (helper-factor uint) (is-source-numerator bool)) 
 	(let ((helper (contract-of helper-trait))
 			(price-a (try! (get-price-internal helper source source-factor))) ;; stx/usd: 1.78986355
 			(price-b (try! (get-price-internal helper target helper-factor))) ;; stx/welsh : 958.02094616
@@ -323,6 +350,128 @@
 			(ok (if is-source-numerator (div-down price-b price-a) (div-down price-a price-b)))	
 ))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; token 0 & 1 define the pool
+(define-public (dca-users-b (dca-strategy <strategy-trait>)
+														(token0 <ft-trait-b>)
+														(token1 <ft-trait-b>)
+														(token-in <ft-trait-b>)
+														(token-out <ft-trait-b>)
+														(share-fee-to <share-fee-to-trait>)
+														(swap-configs {target-amount-out: uint})
+														(keys (list 20 {user:principal, source:principal, target:principal, interval:uint, strategy: principal}))
+														)
+		(let ((source (contract-of token-in))
+					(target (contract-of token-out))
+					(curr-timestamp (unwrap-panic (get-block-info? time (- block-height u1))))
+					(curr-timestamp-list (list curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp))
+					(user-amounts (map dca-user-b (list token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0)
+																					(list token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1)
+																					(list token-in token-in token-in token-in token-in token-in token-in token-in token-in token-in token-in token-in token-in token-in token-in token-in token-in token-in token-in token-in)
+																					(list token-out token-out token-out token-out token-out token-out token-out token-out token-out token-out token-out token-out token-out token-out token-out token-out token-out token-out token-out token-out)
+																					keys
+																					curr-timestamp-list
+																				))
+		)
+			(print {user-amounts: user-amounts})
+			(let ((agg-amounts (fold aggregate-amounts user-amounts {total-amount:u0, fee:u0}))
+					(source-total-amount (get total-amount agg-amounts))
+					(fee (get fee agg-amounts))
+					(source-target-map (unwrap! (map-get? sources-targets-config {source: source, target: target}) ERR-INVALID-PRINCIPAL))
+					(id (get id source-target-map))
+					(amt-out-min (get target-amount-out swap-configs))
+				)
+				(if (is-eq source-total-amount u0) (ok (list u0)) 
+					(begin 
+						(try! (as-contract (contract-call? .dca-vault transfer-ft token-in source-total-amount (contract-of dca-strategy))))
+						(let ((swap-response (as-contract (try! (contract-call? dca-strategy velar-swap-wrapper id token0 token1 token-in token-out share-fee-to source-total-amount amt-out-min ))))
+									(target-total-amount (get amt-out swap-response))
+								)
+								(print { function:"dca-users-b", 
+												input: {tokeno:token0, token1:token1, token-in:token-in, token-out:token-out, keys:keys, dca-strategy:dca-strategy},
+												more: {agg-amounts:agg-amounts, source-target-map:source-target-map, user-amounts:user-amounts, swap-configs:swap-configs, swap-response: swap-response} })
+								(add-fee fee source)
+								(ok (map set-new-target-amount (list source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount)
+																						(list target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount)
+																						curr-timestamp-list
+																						user-amounts
+																						))
+))))))
+
+
+(define-private (dca-user-b (token0 <ft-trait-b>)
+														(token1 <ft-trait-b>)
+														(token-in <ft-trait-b>)
+														(token-out <ft-trait-b>)
+														(key (tuple (user principal) (source principal) (target principal) (interval uint) (strategy principal))) 
+														(curr-timestamp uint)) 
+(let ((source-trait token-in)
+				(target-trait token-out)
+				(user (get user key))
+				(source (get source key))
+				(target (get target key))
+				(interval (get interval key))
+				(strategy (get strategy key))
+				(data (unwrap! (get-dca-data user source target interval strategy) ERR-INVALID-KEY))
+				(source-amount-left (get source-amount-left data))
+				(dca-amount (get amount data))
+				(target-amount (get target-amount data))
+				(last-updated-timestamp (get last-updated-timestamp data))
+				(min-price (get min-price data))
+				(max-price (get max-price data))
+				(interval-seconds (unwrap! (get-interval-seconds interval) ERR-INVALID-INTERVAL))
+				(target-timestamp (+ (get seconds interval-seconds) last-updated-timestamp))
+				) 
+				(print {function: "dca-user-b", 
+								input: {user: user, source: source, target: target, interval: interval, curr-timestamp: curr-timestamp},
+								more: {interval-secoinds: interval-seconds, target-timestamp: target-timestamp}})
+				(asserts! (is-eq (contract-of source-trait) source) ERR-INVALID-PRINCIPAL)
+				(asserts! (is-eq (contract-of target-trait) target) ERR-INVALID-PRINCIPAL)
+				(if (>= curr-timestamp target-timestamp)
+						(process-swap-b (contract-of token0) source target user source-amount-left dca-amount min-price max-price interval strategy)
+						(ok {amount-minus-fee: u0, fee: u0, key: none}		
+))))												
+
+(define-private (process-swap-b (token0 principal)
+																(token-in principal)
+																(token-out principal)
+																(user principal)
+																(source-amount-left uint)
+																(dca-amount uint)
+																(min-price uint)
+																(max-price uint)
+																(interval uint)
+																(strategy principal)
+																) 
+	(let ((source-target-config (unwrap! (map-get? sources-targets-config {source: token-in, target: token-out}) ERR-CONFIG-NOT-SET))
+			(id (get id source-target-config))
+			(fee-fixed (get fee-fixed source-target-config))
+			(fee-percent (get fee-percent source-target-config))
+			(is-source-numerator (get is-source-numerator source-target-config))
+			(amount-to-trade (if (< source-amount-left dca-amount) source-amount-left dca-amount))
+			(amount-and-fee (get-amount-and-fee amount-to-trade token-in fee-fixed fee-percent))
+			(price (try! (get-price-b id token0 token-in dca-amount)))
+			) 
+		(print {function: "process-swap", 
+						input:{ token-in:token-in, token-out:token-out, user:user, dca-amount:dca-amount, source-amount-left:source-amount-left, interval:interval, max-price:max-price, min-price:min-price},
+						more:{ amount-to-trade:amount-to-trade, price: price, amount-and-fee: amount-and-fee }})	
+		(asserts! (and (<= price max-price) (>= price min-price)) ERR-INVALID-PRICE)
+		(ok (merge amount-and-fee {key:(some {user:user, source:token-in, target:token-out, interval:interval, strategy: strategy})})
+)))
+
+(define-private (get-price-b (id uint) (token0 principal) (token-in principal) (amt-in uint)) 
+	(let ((pool (contract-call? 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-core do-get-pool id))
+				(is-token0 (is-eq token0 token-in))
+				(amt-out  (try! (contract-call? 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-library get-amount-out
+													amt-in
+													(if is-token0 (get reserve0 pool) (get reserve1 pool)) ;; reserve-in
+													(if is-token0 (get reserve1 pool) (get reserve0 pool)) ;; reserve-out
+													(get swap-fee pool) )))
+				)
+				(print {function: "get-price-b", input:{id: id, token0: token0, token-in: token-in, amt-in:amt-in}, 
+													more: {price: (div-down amt-in amt-out), amt-out: amt-out, pool: pool}})
+				(ok (div-down amt-in amt-out))  ;; todo needs some condition based on is-numerator, token0 vs token-in etc & order of token1 vs token0
+))
 ;; ----------------------------------------------------------------------------------------
 ;; -----------------------------------------FEES-------------------------------------------
 ;; ----------------------------------------------------------------------------------------
@@ -340,10 +489,10 @@
 (define-private (add-fee (new-fee uint) (source principal)) 
 	(let ((prev-fee (get-fee source))
 			) 
-				(map-set fee-map {source: source} {fee: (+ new-fee prev-fee)})
+		(map-set fee-map {source: source} {fee: (+ new-fee prev-fee)})
 ))
 
-(define-public (transfer-fee-to-treasury (source-trait <ft-trait>))
+(define-public (transfer-fee-to-treasury (source-trait <ft-trait-a>))
 (let ((source  (contract-of source-trait))
 			(fee (unwrap-panic (get fee (map-get? fee-map {source: source})))))
 		(try! (contract-call? .dca-vault transfer-ft source-trait fee (var-get treasury)))
