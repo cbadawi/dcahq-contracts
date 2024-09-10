@@ -387,7 +387,7 @@ export const initDca = (
   addApproved(contractDeployer)
   addApproved(ammMockContract)
   addApproved(dcaManagerContract)
-  addApproved(defaultStrategyContract)
+  addApproved(defaultStrategyContract) // only required in test
   addStrategy(defaultStrategyContract)
   setSourcesTargetsConfig({
     source,

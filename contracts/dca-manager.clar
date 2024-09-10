@@ -198,17 +198,18 @@
 													))
 						)
 					(print {user-amounts: user-amounts})
-					(let ((agg-amounts (fold aggregate-amounts user-amounts {total-amount:u0, fee:u0}))
-					(source-total-amount (get total-amount agg-amounts))
+					(let ((agg-amounts (fold aggregate-amounts user-amounts {total-amount: u0, fee: u0, price: u0}))
+					(source-total-amount (get total-amount agg-amounts)) ;; u9950000000
 					(fee (get fee agg-amounts))
 					(source-target-map (unwrap! (map-get? sources-targets-config {source: source, target: target}) ERR-INVALID-PRINCIPAL))
 					(is-source-numerator (get is-source-numerator source-target-map))
 					(source-factor (get source-factor source-target-map))
 					(helper-factor (get helper-factor source-target-map))
 					(max-slippage (get max-slippage source-target-map))
-					(price (try! (get-price source target source-factor is-source-numerator helper-trait (some helper-factor))))
-					(amount-dy (if is-source-numerator (mul-down source-total-amount price) (div-down source-total-amount price)))
-					(min-dy (mul-down amount-dy max-slippage))
+					;; (price (try! (get-price source target source-factor is-source-numerator helper-trait (some helper-factor)))) ;; u82513081639
+					(price (get price agg-amounts))
+					(amount-dy (if is-source-numerator (div-down price source-total-amount) (mul-down source-total-amount price))) ;; u12_058693
+					(min-dy (- amount-dy (mul-down amount-dy max-slippage))) ;; u_482347
 				) 
 				(if (is-eq source-total-amount u0) (ok (list u0)) 
 					(begin 
@@ -254,7 +255,7 @@
 				(asserts! (is-eq (contract-of target-trait) target) ERR-INVALID-PRINCIPAL)
 				(if (>= curr-timestamp target-timestamp)
 						(process-swap source target helper-trait user amount min-price max-price source-amount-left interval strategy)
-						(ok {amount-minus-fee: u0, fee: u0, key: none})
+						(ok {amount-minus-fee: u0, fee: u0, price: u0, key: none})
 )))
 
 (define-private (process-swap (source principal)
@@ -277,12 +278,13 @@
 				(fee-percent (get fee-percent source-target-config))
 				(amount-and-fee (get-amount-and-fee amount-to-trade source fee-fixed fee-percent))
 				(price (try! (get-price source target source-factor is-source-numerator helper-trait (some helper-factor))))
+				(swap-info (merge amount-and-fee { price: price }))
 			)
 		(print {function: "process-swap", 
 						input:{ source:source, target:target, user:user, dca-amount:dca-amount, source-amount-left:source-amount-left, interval:interval, max-price:max-price, min-price:min-price},
 						more:{ amount-to-trade:amount-to-trade, price:price, amount-and-fee: amount-and-fee }})
 		(asserts! (and (<= price max-price) (>= price min-price)) ERR-INVALID-PRICE)
-		(ok (merge amount-and-fee {key:(some {user:user, source:source, target:target, interval:interval, strategy: strategy})})
+		(ok (merge swap-info {key:(some {user:user, source:source, target:target, interval:interval, strategy: strategy})})
 )))
 
 (define-private (get-amount-and-fee  (amount-to-trade uint) (source principal) (fee-fixed uint) (fee-percent uint)) 
@@ -295,7 +297,7 @@
 (define-private (set-new-target-amount (source-total-amount uint) ;; u9999500000
 																			(target-total-amount uint)
 																			(curr-timestamp uint) 
-																			(user-dca-amount-resp (response (tuple (amount-minus-fee uint) (fee uint) (key (optional (tuple (interval uint) (source principal) (target principal) (user principal) (strategy principal))))) uint))
+																			(user-dca-amount-resp (response (tuple (amount-minus-fee uint) (fee uint) (price uint) (key (optional (tuple (interval uint) (source principal) (target principal) (user principal) (strategy principal))))) uint))
 																			)  
 			(match user-dca-amount-resp user-dca-amount
 				(let ((key (unwrap-panic (get key user-dca-amount)))
@@ -318,15 +320,17 @@
 			u0
 	))
 
-(define-private (aggregate-amounts (curr-resp (response (tuple (amount-minus-fee uint) (fee uint) (key (optional (tuple (strategy principal) (interval uint) (source principal) (target principal) (user principal))))) uint))
-																		(prev (tuple (total-amount uint) (fee uint))))
-		(let ((curr (match curr-resp curr curr err-curr {amount-minus-fee:u0, fee:u0, key: none}))
+(define-private (aggregate-amounts (curr-resp (response (tuple (amount-minus-fee uint) (price uint) (fee uint) (key (optional (tuple (strategy principal) (interval uint) (source principal) (target principal) (user principal))))) uint))
+																		(prev (tuple (total-amount uint) (fee uint) (price uint))))
+		(let ((curr (match curr-resp curr curr err-curr {amount-minus-fee:u0, fee:u0, price: u0, key: none}))
 					(curr-amount-minus-fee (get amount-minus-fee curr))
 					(curr-fee (get fee curr))
+					(curr-price (get price curr))
 					(prev-amount-minus-fee (get total-amount prev))
 					(prev-fee (get fee prev))
+					(prev-price (get price prev))
 				)
-	{total-amount: (+ curr-amount-minus-fee prev-amount-minus-fee), fee: (+ curr-fee prev-fee)}
+	{total-amount: (+ curr-amount-minus-fee prev-amount-minus-fee), fee: (+ curr-fee prev-fee), price: (if (> curr-price prev-price) curr-price prev-price)}
 ))
 
 (define-private (get-price (source principal) (target principal) (source-factor uint) (is-source-numerator bool) (helper-trait-opt (optional <ft-trait-a>)) (helper-factor (optional uint)))
@@ -374,12 +378,17 @@
 																				))
 		)
 			(print {user-amounts: user-amounts})
-			(let ((agg-amounts (fold aggregate-amounts user-amounts {total-amount:u0, fee:u0}))
+			(let ((agg-amounts (fold aggregate-amounts user-amounts {total-amount: u0, fee: u0, price: u0}))
 					(source-total-amount (get total-amount agg-amounts))
 					(fee (get fee agg-amounts))
-					(source-target-map (unwrap! (map-get? sources-targets-config {source: source, target: target}) ERR-INVALID-PRINCIPAL))
-					(id (get id source-target-map))
+					(source-target-config (unwrap! (map-get? sources-targets-config {source: source, target: target}) ERR-INVALID-PRINCIPAL))
+					(id (get id source-target-config))
+					(max-slippage (get max-slippage source-target-config))
 					(amt-out-min (get target-amount-out swap-configs))
+					(is-source-numerator (get is-source-numerator source-target-config))
+					(price (get price agg-amounts))
+					(amount-dy (if is-source-numerator (div-down price source-total-amount) (mul-down source-total-amount price))) ;; u12_058693
+					(min-dy (- amount-dy (mul-down amount-dy max-slippage)))
 				)
 				(if (is-eq source-total-amount u0) (ok (list u0)) 
 					(begin 
@@ -389,7 +398,7 @@
 								)
 								(print { function:"dca-users-b", 
 												input: {tokeno:token0, token1:token1, token-in:token-in, token-out:token-out, keys:keys, dca-strategy:dca-strategy},
-												more: {agg-amounts:agg-amounts, source-target-map:source-target-map, user-amounts:user-amounts, swap-configs:swap-configs, swap-response: swap-response} })
+												more: {agg-amounts:agg-amounts, source-target-config:source-target-config, user-amounts:user-amounts, swap-configs:swap-configs, swap-response: swap-response} })
 								(add-fee fee source)
 								(ok (map set-new-target-amount (list source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount)
 																						(list target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount)
@@ -429,7 +438,7 @@
 				(asserts! (is-eq (contract-of target-trait) target) ERR-INVALID-PRINCIPAL)
 				(if (>= curr-timestamp target-timestamp)
 						(process-swap-b (contract-of token0) source target user source-amount-left dca-amount min-price max-price interval strategy)
-						(ok {amount-minus-fee: u0, fee: u0, key: none}		
+						(ok {amount-minus-fee: u0, fee: u0, price: u0, key: none}		
 ))))												
 
 (define-private (process-swap-b (token0 principal)
@@ -447,16 +456,16 @@
 			(id (get id source-target-config))
 			(fee-fixed (get fee-fixed source-target-config))
 			(fee-percent (get fee-percent source-target-config))
-			(is-source-numerator (get is-source-numerator source-target-config))
 			(amount-to-trade (if (< source-amount-left dca-amount) source-amount-left dca-amount))
-			(amount-and-fee (get-amount-and-fee amount-to-trade token-in fee-fixed fee-percent))
 			(price (try! (get-price-b id token0 token-in dca-amount)))
+			(amount-and-fee (get-amount-and-fee amount-to-trade token-in fee-fixed fee-percent))
+			(swap-info (merge amount-and-fee { price: price }))
 			) 
 		(print {function: "process-swap", 
 						input:{ token-in:token-in, token-out:token-out, user:user, dca-amount:dca-amount, source-amount-left:source-amount-left, interval:interval, max-price:max-price, min-price:min-price},
 						more:{ amount-to-trade:amount-to-trade, price: price, amount-and-fee: amount-and-fee }})	
 		(asserts! (and (<= price max-price) (>= price min-price)) ERR-INVALID-PRICE)
-		(ok (merge amount-and-fee {key:(some {user:user, source:token-in, target:token-out, interval:interval, strategy: strategy})})
+		(ok (merge swap-info {key:(some {user:user, source:token-in, target:token-out, interval:interval, strategy: strategy})})
 )))
 
 (define-private (get-price-b (id uint) (token0 principal) (token-in principal) (amt-in uint)) 
