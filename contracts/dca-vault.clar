@@ -1,9 +1,7 @@
 (use-trait ft 'SP2AKWJYC7BNY18W1XXKPGP0YVEK63QJG4793Z2D4.sip-010-trait-ft-standard.sip-010-trait)
 
-(define-constant ERR-NOT-AUTHORIZED (err u1000))
-(define-constant ERR-PAUSED (err u1001))
-(define-constant ERR-INVALID-AMOUNT (err u2000))
-(define-constant ERR-INVALID-PRICE (err u2006))
+(define-constant ERR-NOT-AUTHORIZED (err u10000))
+(define-constant ERR-PAUSED (err u10001))
 
 (define-data-var paused bool false)
 

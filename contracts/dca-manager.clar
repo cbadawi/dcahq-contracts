@@ -14,6 +14,7 @@
 (define-constant ERR-FETCHING-PRICE (err u9008))
 (define-constant ERR-INVALID-STRATEGY (err u9009))
 (define-constant ERR-MAX-POSITIONS-EXCEEDED (err u9010))
+(define-constant ERR-MAX-SLIPPAGE-EXCEEDED (err u9011))
 
 (define-constant ONE_8 u100000000) ;; 8 decimal places
 
@@ -105,6 +106,12 @@
 																	(list {source:source, target:target, interval:interval, strategy: strategy})))
 					(map-insert user-keys {user: user} (list {source:source, target:target, interval:interval, strategy: strategy}))				
 ))))
+
+(define-public (set-treasury (address principal)) 
+	(begin 
+	(asserts! (is-approved) ERR-NOT-AUTHORIZED) 
+	(ok (var-set treasury address))
+	))
 ;; --------------------------------------------------------------------------
 ;; ----------------------------------------DCA---------------------------------------------
 ;; ----------------------------------------------------------------------------------------
@@ -124,11 +131,12 @@
 			(max-dca-threshold (get max-dca-threshold sources-targets-conf))
 			)
 		(asserts! (and (>= dca-amount min-dca-threshold) (<= dca-amount max-dca-threshold) (>= total-amount dca-amount)) ERR-INVALID-AMOUNT)
+		(asserts! (not (is-eq (contract-of source-trait) target)) ERR-INVALID-PRINCIPAL)
 		(unwrap! (map-get? interval-id-to-seconds {interval: interval}) ERR-INVALID-INTERVAL)
 		(unwrap! (map-get? approved-startegies strategy) ERR-INVALID-STRATEGY)
 		(asserts! (map-insert dca-data {user:sender, source:source, target:target, interval:interval, strategy: strategy} data) ERR-DCA-ALREADY-EXISTS)
 		(try! (set-new-user-key sender source target interval strategy))
-		(print {function: "creae-dca", 
+		(print {function: "create-dca", 
 						input: {user: sender, source-trait: source-trait, target:target, interval:interval, total-amount:total-amount, dca-amount:dca-amount, min-price:min-price, max-price: max-price},
 						more: {more: data }})
 		(contract-call? source-trait transfer total-amount sender .dca-vault none)
@@ -201,15 +209,15 @@
 					(let ((agg-amounts (fold aggregate-amounts user-amounts {total-amount: u0, fee: u0, price: u0}))
 					(source-total-amount (get total-amount agg-amounts)) ;; u9950000000
 					(fee (get fee agg-amounts))
-					(source-target-map (unwrap! (map-get? sources-targets-config {source: source, target: target}) ERR-INVALID-PRINCIPAL))
-					(is-source-numerator (get is-source-numerator source-target-map))
-					(source-factor (get source-factor source-target-map))
-					(helper-factor (get helper-factor source-target-map))
-					(max-slippage (get max-slippage source-target-map))
+					(source-target-config (unwrap! (map-get? sources-targets-config {source: source, target: target}) ERR-INVALID-PRINCIPAL))
+					(is-source-numerator (get is-source-numerator source-target-config))
+					(source-factor (get source-factor source-target-config))
+					(helper-factor (get helper-factor source-target-config))
+					(max-slippage (get max-slippage source-target-config))
 					;; (price (try! (get-price source target source-factor is-source-numerator helper-trait (some helper-factor)))) ;; u82513081639
 					(price (get price agg-amounts))
 					(amount-dy (if is-source-numerator (div-down price source-total-amount) (mul-down source-total-amount price))) ;; u12_058693
-					(min-dy (- amount-dy (mul-down amount-dy max-slippage))) ;; u_482347
+					(min-dy (- amount-dy (mul-down amount-dy max-slippage))) 
 				) 
 				(if (is-eq source-total-amount u0) (ok (list u0)) 
 					(begin 
@@ -219,7 +227,7 @@
 								)
 								(print { function:"dca-users", 
 												input: {source:source-trait, target:target-trait, keys:keys, dca-strategy:dca-strategy, helper-tait:helper-trait},
-												more: {source-target-map:source-target-map, agg-amounts:agg-amounts, amount-dy:amount-dy, min-dy:min-dy, target-total-amount:target-total-amount} })
+												more: {source-target-config:source-target-config, agg-amounts:agg-amounts, amount-dy:amount-dy, min-dy:min-dy, target-total-amount:target-total-amount} })
 								(add-fee fee source)
 								(ok (map set-new-target-amount (list source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount)
 																						(list target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount)
@@ -392,13 +400,14 @@
 				)
 				(if (is-eq source-total-amount u0) (ok (list u0)) 
 					(begin 
+						(asserts! (> min-dy amt-out-min) ERR-MAX-SLIPPAGE-EXCEEDED)
 						(try! (as-contract (contract-call? .dca-vault transfer-ft token-in source-total-amount (contract-of dca-strategy))))
 						(let ((swap-response (as-contract (try! (contract-call? dca-strategy velar-swap-wrapper id token0 token1 token-in token-out share-fee-to source-total-amount amt-out-min ))))
 									(target-total-amount (get amt-out swap-response))
 								)
 								(print { function:"dca-users-b", 
 												input: {tokeno:token0, token1:token1, token-in:token-in, token-out:token-out, keys:keys, dca-strategy:dca-strategy},
-												more: {agg-amounts:agg-amounts, source-target-config:source-target-config, user-amounts:user-amounts, swap-configs:swap-configs, swap-response: swap-response} })
+												more: {agg-amounts:agg-amounts, user-amounts:user-amounts, swap-configs:swap-configs, amount-dy:amount-dy, min-dy: min-dy} })
 								(add-fee fee source)
 								(ok (map set-new-target-amount (list source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount)
 																						(list target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount)
@@ -456,8 +465,9 @@
 			(id (get id source-target-config))
 			(fee-fixed (get fee-fixed source-target-config))
 			(fee-percent (get fee-percent source-target-config))
+			(is-source-numerator (get is-source-numerator source-target-config))
 			(amount-to-trade (if (< source-amount-left dca-amount) source-amount-left dca-amount))
-			(price (try! (get-price-b id token0 token-in dca-amount)))
+			(price (try! (get-price-b id token0 token-in dca-amount is-source-numerator)))
 			(amount-and-fee (get-amount-and-fee amount-to-trade token-in fee-fixed fee-percent))
 			(swap-info (merge amount-and-fee { price: price }))
 			) 
@@ -468,7 +478,7 @@
 		(ok (merge swap-info {key:(some {user:user, source:token-in, target:token-out, interval:interval, strategy: strategy})})
 )))
 
-(define-private (get-price-b (id uint) (token0 principal) (token-in principal) (amt-in uint)) 
+(define-private (get-price-b (id uint) (token0 principal) (token-in principal) (amt-in uint) (is-source-numerator bool)) 
 	(let ((pool (contract-call? 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-core do-get-pool id))
 				(is-token0 (is-eq token0 token-in))
 				(amt-out  (try! (contract-call? 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-library get-amount-out
@@ -476,10 +486,11 @@
 													(if is-token0 (get reserve0 pool) (get reserve1 pool)) ;; reserve-in
 													(if is-token0 (get reserve1 pool) (get reserve0 pool)) ;; reserve-out
 													(get swap-fee pool) )))
-				)
-				(print {function: "get-price-b", input:{id: id, token0: token0, token-in: token-in, amt-in:amt-in}, 
-													more: {price: (div-down amt-in amt-out), amt-out: amt-out, pool: pool}})
-				(ok (div-down amt-in amt-out))  ;; todo needs some condition based on is-numerator, token0 vs token-in etc & order of token1 vs token0
+				(price (if is-source-numerator (div-down amt-in amt-out) (div-down amt-out amt-in)))
+			)
+			(print {function: "get-price-b", input:{id: id, token0: token0, token-in: token-in, amt-in:amt-in}, 
+												more: {price: price,  pool: pool, amt-out: amt-out}})
+			(ok price)  ;; todo needs some condition based on is-numerator, token0 vs token-in etc & order of token1 vs token0
 ))
 ;; ----------------------------------------------------------------------------------------
 ;; -----------------------------------------FEES-------------------------------------------

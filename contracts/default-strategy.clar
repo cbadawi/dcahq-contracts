@@ -21,7 +21,11 @@
 																	(amt-out-min uint))
   (begin
 		(asserts! (is-approved) ERR-NOT-AUTHORIZED) 
-		(contract-call? 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-router swap-exact-tokens-for-tokens id token0 token1 token-in token-out share-fee-to amt-in amt-out-min
+		(let ((swap-response (try! (as-contract (contract-call? 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-router swap-exact-tokens-for-tokens id token0 token1 token-in token-out share-fee-to amt-in amt-out-min))))
+					(amt-out (get amt-out swap-response))
+					)
+				(try! (as-contract (contract-call? token-out transfer amt-out tx-sender .dca-vault none)))
+			(ok swap-response)
 )))
 
 (define-public (alex-swap-wrapper (source-trait <ft-trait-a>) 
