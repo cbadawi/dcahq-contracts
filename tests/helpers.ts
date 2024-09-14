@@ -50,14 +50,16 @@ export const accounts = simnet.getAccounts()
 export const address1 = accounts.get("wallet_1")! // ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5
 export const address2 = accounts.get("wallet_2")! // ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
 export const address3 = accounts.get("wallet_3")!
+export const address4 = accounts.get("wallet_4")!
 
 export const contractDeployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
-export const dcaRegistryContract = contractDeployer + ".dca-registry"
-export const dcaManagerContract = contractDeployer + ".dca-manager"
-export const dcaVaultContract = contractDeployer + ".dca-vault"
-export const authContract = contractDeployer + ".auth"
+export const version = "-v0"
+export const dcaManagerContract = contractDeployer + ".dca-manager" + version
+export const dcaVaultContract = contractDeployer + ".dca-vault" + version
+export const authContract = contractDeployer + ".auth" + version
+export const defaultStrategyContract =
+  contractDeployer + ".default-strategy" + version
 export const ammMockContract = contractDeployer + ".mock-alex"
-export const defaultStrategyContract = contractDeployer + ".default-strategy"
 export const shareFeeToContract =
   "SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-share-fee-to"
 
@@ -385,8 +387,8 @@ export const initDca = (
   isSourceNumerator = false
 ) => {
   addApproved(contractDeployer)
-  addApproved(ammMockContract)
   addApproved(dcaManagerContract)
+  addApproved(ammMockContract)
   addApproved(defaultStrategyContract) // only required in test
   addStrategy(defaultStrategyContract)
   setSourcesTargetsConfig({
@@ -399,7 +401,7 @@ export const initDca = (
     hopFactor: 0,
     minDcaThreshold: 0,
     maxDcaThreshold: maxUint128Value,
-    maxSlipage: fourPercent,
+    maxSlipage: UNIT * 0.5,
     isSourceNumerator
   })
   mintSourceToken(address, totalAmount, source)
