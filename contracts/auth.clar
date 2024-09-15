@@ -12,8 +12,8 @@
 (define-read-only (is-owner)
   (is-eq tx-sender (var-get contract-owner))
 )
-(define-read-only (is-approved)
-  (default-to false (map-get? approved-contracts tx-sender))
+(define-read-only (is-approved (address principal))
+  (default-to false (map-get? approved-contracts address))
 )
 
 (define-public (change-owner (new-owner principal)) 

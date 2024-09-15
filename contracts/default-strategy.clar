@@ -8,7 +8,7 @@
 (define-constant ERR-NOT-AUTHORIZED (err u1000))
 
 (define-read-only (is-approved)
-	(contract-call? .auth-v0 is-approved)
+	(contract-call? .auth-v0 is-approved contract-caller)
 )
 
 (define-public (velar-swap-wrapper (id uint)
