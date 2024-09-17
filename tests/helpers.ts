@@ -1,5 +1,6 @@
 import { Cl } from "@stacks/transactions"
 
+export const burnAddress = "SP000000000000000000002Q6VF78"
 // fpmm errors
 export const ERR_NOT_AUTHORIZED = Cl.uint(9999)
 export const ERR_INVALID_AMOUNT = Cl.uint(9001)
@@ -53,7 +54,7 @@ export const address3 = accounts.get("wallet_3")!
 export const address4 = accounts.get("wallet_4")!
 
 export const contractDeployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
-export const version = "-v0"
+export const version = "-v2"
 export const dcaManagerContract = contractDeployer + ".dca-manager" + version
 export const dcaVaultContract = contractDeployer + ".dca-vault" + version
 export const authContract = contractDeployer + ".auth" + version

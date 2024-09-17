@@ -1,4 +1,4 @@
-(impl-trait .sip-010-trait.sip-010-trait)
+(impl-trait 'SP2AKWJYC7BNY18W1XXKPGP0YVEK63QJG4793Z2D4.sip-010-trait-ft-standard.sip-010-trait)
 
 (define-fungible-token wusd-6)
 
@@ -29,7 +29,7 @@
 )
 
 (define-read-only (is-approved)
-	(contract-call? .auth is-approved)
+	(contract-call? .auth-v2 is-approved contract-caller)
 )
 
 (define-public (add-approved-contract (new-approved-contract principal))

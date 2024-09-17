@@ -1,4 +1,4 @@
-(impl-trait .strategy-v0.default-strategy)
+(impl-trait .strategy-v2.default-strategy)
 
 (use-trait ft-trait-a 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-sip-010.sip-010-trait)
 (use-trait ft-trait-b 'SP2AKWJYC7BNY18W1XXKPGP0YVEK63QJG4793Z2D4.sip-010-trait-ft-standard.sip-010-trait)
@@ -8,7 +8,7 @@
 (define-constant ERR-NOT-AUTHORIZED (err u1000))
 
 (define-read-only (is-approved)
-	(contract-call? .auth-v0 is-approved contract-caller)
+	(contract-call? .auth-v2 is-approved contract-caller)
 )
 
 (define-public (velar-swap-wrapper (id uint)

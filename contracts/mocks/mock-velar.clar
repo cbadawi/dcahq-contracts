@@ -17,9 +17,30 @@
         (ok {amt-out: amt-out-min})
     )
 )
-(define-public (do-get-pool (id uint))
-    (ok {reserve0: u30000, reserve1: u20000, swap-fee: {
+(define-read-only (do-get-pool (id uint)) {reserve0: u55926507788, reserve1: u81308328291, swap-fee: {
       den: u1000,
       num: u50
-    },})
+    },}
 )
+;; {
+;;     block-height: u162389,
+;;     burn-block-height: u857345,
+;;     lp-token: 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.wstx-aeusdc2,
+;;     protocol-fee: {
+;;       den: u1000,
+;;       num: u250
+;;     },
+;;     reserve0: u55926507788,
+;;     reserve1: u81308328291,
+;;     share-fee: {
+;;       den: u1000,
+;;       num: u50
+;;     },
+;;     swap-fee: {
+;;       den: u1000,
+;;       num: u997
+;;     },
+;;     symbol: "wSTX-aeUSDC",
+;;     token0: 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.wstx,
+;;     token1: 'SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-aeusdc
+;;   }

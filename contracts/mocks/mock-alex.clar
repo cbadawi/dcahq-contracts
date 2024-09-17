@@ -10,7 +10,7 @@
 (define-public (swap-helper (source-trait <ft>) (target-trait <ft>) (factor uint) (dx uint) (min-dy (optional uint)))
 	(let ((sender tx-sender)) 
 		(asserts! true (err u420))
-		(as-contract (try! (contract-call? source-trait burn dx .dca-vault)))
+		;; (as-contract (try! (contract-call? source-trait burn dx .dca-vault)))
 		(as-contract (try! (contract-call? target-trait mint (unwrap-panic min-dy) sender)))
 		(ok (unwrap-panic min-dy))
 ))

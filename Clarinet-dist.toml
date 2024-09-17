@@ -30,27 +30,27 @@ contract_id = 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-core'
 contract_id = 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-library'
 
 # DIST ########################################################################################
-[contracts.auth-v0]
+[contracts.auth-v2]
 path = 'contracts/dist/auth.clar'
 clarity_version = 2
 epoch = 2.4
 
-[contracts.dca-manager-v0]
+[contracts.dca-manager-v2]
 path = 'contracts/dist/dca-manager.clar'
 clarity_version = 2
 epoch = 2.4
 
-[contracts.dca-vault-v0]
+[contracts.dca-vault-v2]
 path = 'contracts/dist/dca-vault.clar'
 clarity_version = 2
 epoch = 2.4
 
-[contracts.default-strategy-v0]
+[contracts.default-strategy-v2]
 path = 'contracts/dist/default-strategy.clar'
 clarity_version = 2
 epoch = 2.4
 
-[contracts.strategy-v0]
+[contracts.strategy-v2]
 path = 'contracts/dist/strategy.clar'
 clarity_version = 2
 epoch = 2.4

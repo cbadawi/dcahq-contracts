@@ -9,45 +9,38 @@ plan:
     - id: 0
       transactions:
         # - contract-publish:
-        #     contract-name: auth-v0
+        #     contract-name: auth-v2
         #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-        #     cost: 515518
+        #     cost: 499376
         #     path: contracts/dist/auth.clar
         #     anchor-block-only: true
         #     clarity-version: 2
         # - contract-publish:
-        #     contract-name: dca-vault-v0
+        #     contract-name: dca-vault-v2
         #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-        #     cost: 515496
+        #     cost: 499305
         #     path: contracts/dist/dca-vault.clar
         #     anchor-block-only: true
         #     clarity-version: 2
         # - contract-publish:
-        #     contract-name: strategy-v0
+        #     contract-name: strategy-v2
         #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-        #     cost: 515541
+        #     cost: 1599446
         #     path: contracts/dist/strategy.clar
         #     anchor-block-only: true
         #     clarity-version: 2
         # - contract-publish:
-        #     contract-name: dca-manager-v0
+        #     contract-name: dca-manager-v2
         #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-        #     cost: 518552
+        #     cost: 910839
         #     path: contracts/dist/dca-manager.clar
         #     anchor-block-only: true
         #     clarity-version: 2
-        # - contract-publish:
-        #     contract-name: default-strategy-v0-0
-        #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-        #     cost: 515678
-        #     path: contracts/dist/default-strategy.clar
-        #     anchor-block-only: true
-        #     clarity-version: 2
         - contract-publish:
-            contract-name: dca-manager-v0-0
+            contract-name: default-strategy-v2
             expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-            cost: 518552
-            path: contracts/dist/dca-manager.clar
+            cost: 399871
+            path: contracts/dist/default-strategy.clar
             anchor-block-only: true
             clarity-version: 2
       epoch: "2.4"
