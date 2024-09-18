@@ -8,38 +8,38 @@ plan:
   batches:
     - id: 0
       transactions:
-        # - contract-publish:
-        #     contract-name: auth-v2
-        #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-        #     cost: 499376
-        #     path: contracts/dist/auth.clar
-        #     anchor-block-only: true
-        #     clarity-version: 2
-        # - contract-publish:
-        #     contract-name: dca-vault-v2
-        #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-        #     cost: 499305
-        #     path: contracts/dist/dca-vault.clar
-        #     anchor-block-only: true
-        #     clarity-version: 2
-        # - contract-publish:
-        #     contract-name: strategy-v2
-        #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-        #     cost: 1599446
-        #     path: contracts/dist/strategy.clar
-        #     anchor-block-only: true
-        #     clarity-version: 2
-        # - contract-publish:
-        #     contract-name: dca-manager-v2
-        #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-        #     cost: 910839
-        #     path: contracts/dist/dca-manager.clar
-        #     anchor-block-only: true
-        #     clarity-version: 2
+        - contract-publish:
+            contract-name: auth-v2
+            expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
+            cost: 443555
+            path: contracts/dist/auth.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: dca-vault-v2
+            expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
+            cost: 443535
+            path: contracts/dist/dca-vault.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: strategy-v2
+            expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
+            cost: 443574
+            path: contracts/dist/strategy.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: dca-manager-v2
+            expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
+            cost: 446793
+            path: contracts/dist/dca-manager.clar
+            anchor-block-only: true
+            clarity-version: 2
         - contract-publish:
             contract-name: default-strategy-v2
             expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-            cost: 399871
+            cost: 443692
             path: contracts/dist/default-strategy.clar
             anchor-block-only: true
             clarity-version: 2

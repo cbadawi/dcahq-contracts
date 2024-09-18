@@ -24,7 +24,7 @@
 		(let ((swap-response (try! (as-contract (contract-call? 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-router swap-exact-tokens-for-tokens id token0 token1 token-in token-out share-fee-to amt-in amt-out-min))))
 					(amt-out (get amt-out swap-response))
 					)
-				(try! (as-contract (contract-call? token-out transfer amt-out tx-sender .dca-vault none)))
+				(try! (as-contract (contract-call? token-out transfer amt-out tx-sender .dca-vault-v2 none)))
 			(ok swap-response)
 )))
 
@@ -38,7 +38,7 @@
 (begin
 	(asserts! (is-approved) ERR-NOT-AUTHORIZED) 
 	(let ((swap-response (try! (alex-swap-internal source-trait target-trait source-factor dx min-d-target factor-hop hop-trait-opt))))
-				(try! (as-contract (contract-call? target-trait transfer swap-response tx-sender .dca-vault none)))
+				(try! (as-contract (contract-call? target-trait transfer swap-response tx-sender .dca-vault-v2 none)))
 				(print {function:"swap-wrapper", 
 								params:{source-trait:source-trait, target-trait:target-trait, source-factor:source-factor, dx:dx, min-d-target:min-d-target, facotr-hop:factor-hop, hop-trait-opt:hop-trait-opt},
 								more:{swap-response:swap-response}})

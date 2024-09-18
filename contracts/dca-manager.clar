@@ -19,6 +19,11 @@
 (define-constant ONE_8 u100000000) ;; 8 decimal places
 (define-constant ONE_6 u1000000) ;; 6 decimal places
 
+(define-constant TWO_HOURS u7200)
+(define-constant ONE_DAY u7200)
+(define-constant ONE_WEEK u7200)
+
+
 (define-data-var treasury principal tx-sender)
 
 (define-map sources-targets-config {source: principal, target: principal} 
@@ -60,10 +65,10 @@
 												last-updated-timestamp: uint})
 
 (define-map interval-id-to-seconds { interval: uint  } { seconds: uint })
-(map-set interval-id-to-seconds {interval: u0} {seconds: u7200}) ;; 2 hrs
-(map-set interval-id-to-seconds {interval: u1} {seconds: u43200})  ;; 12 hrs
-(map-set interval-id-to-seconds {interval: u2} {seconds: u86400}) ;; daily
-(map-set interval-id-to-seconds {interval: u3} {seconds: u604800}) ;; weekly
+(map-set interval-id-to-seconds {interval: u0} {seconds: TWO_HOURS}) ;; 2 hrs
+;; (map-set interval-id-to-seconds {interval: u1} {seconds: u43200})  ;; 12 hrs
+(map-set interval-id-to-seconds {interval: u2} {seconds: ONE_DAY}) ;; daily
+(map-set interval-id-to-seconds {interval: u3} {seconds: ONE_WEEK}) ;; weekly
 ;; ----------------------------------------------------------------------------------------
 ;; --------------------------------------Getters-------------------------------------------
 ;; ----------------------------------------------------------------------------------------
@@ -573,7 +578,7 @@
 (let ((source  (contract-of source-trait))
 			(fee (unwrap-panic (get fee (map-get? fee-map {source: source})))))
 		(try! (contract-call? .dca-vault-v2 transfer-ft source-trait fee (var-get treasury)))
-		(print {function:"withdraw-fee", args:{source-trait:source-trait}, more:{fee:fee}})
+		(print {function:"transfer-fee-to-treasury", args:{source-trait:source-trait}, more:{fee:fee}})
 		(ok (map-set fee-map {source: source} {fee: u0}))
 ))
 ;; ----------------------------------------------------------------------------------------
