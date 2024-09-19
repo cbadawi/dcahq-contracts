@@ -20,9 +20,8 @@
 (define-constant ONE_6 u1000000) ;; 6 decimal places
 
 (define-constant TWO_HOURS u7200)
-(define-constant ONE_DAY u7200)
-(define-constant ONE_WEEK u7200)
-
+(define-constant ONE_DAY u86400)
+(define-constant ONE_WEEK u604800)
 
 (define-data-var treasury principal tx-sender)
 
@@ -140,9 +139,9 @@
 	(begin 
 	(asserts! (is-approved) ERR-NOT-AUTHORIZED) 
 	(ok (var-set treasury address))
-	))
+))
 
-(define-public (set-user-dca-data (source principal) (target principal) (interval uint) (strategy principal) (is-paused bool) (amount uint)) 
+(define-private (set-user-dca-data (source principal) (target principal) (interval uint) (strategy principal) (is-paused bool) (amount uint)) 
 		(let ((user tx-sender)
 					(data (unwrap! (get-dca-data user source target interval strategy) ERR-INVALID-PRINCIPAL))
 					)
@@ -548,7 +547,7 @@
 													(get swap-fee pool) )))
 				(price (if is-source-numerator (div-down-6 amt-target amt-source) (div-down-6 amt-source amt-target)))
 			)
-			(print {function: "ffffffget-price-b", input:{id: id, token0: token0, token-in: token-in, amt-source:amt-source},
+			(print {function: "get-price-b", input:{id: id, token0: token0, token-in: token-in, amt-source:amt-source},
 												more: {price: price,  pool: pool, amt-target: amt-target}})
 			(ok price)
 ))
@@ -595,6 +594,3 @@
 
 (define-private (div-down-6 (a uint) (b uint))
 	(if (is-eq a u0) u0 (/ (* a ONE_6) b)))
-
-
-;; 8,288,182,218,040

@@ -21,7 +21,7 @@ The DCA Manager allows users to set up automated, non-custodial, non-kyc purchas
 - `add-to-position`: Add funds to an existing DCA position
 - `reduce-position`: Remove funds from a DCA position
 - `withdraw`: Withdraw acquired tokens from a DCA position
-- `dca-users`: Execute DCA for multiple users
+- `dca-users`: `dca-users-a` (Alex) & `dca-users-b` (Velar). Execute DCA for multiple users
 
 ## Configuration
 
@@ -33,6 +33,16 @@ The contract allows for detailed configuration of DCA parameters, including:
 - Custom swap strategies
 
 ## tests
+
+Some manual work is needed to run tests. I need to add some initializations to the Alex and Velar project requirements to remove the manual setup.
+
+```toml
+[[project.requirements]]
+contract_id = 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01'
+etc...
+```
+
+For now I manually replace the hardcoded velar and alex function calls (`'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01` & `'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-core`) [dca manager](contracts/dca-manager.clar) & [default strategy](contracts/default-strategy.clar) with the mock-alex and mock-velar contracts.
 
 ```bash
 npm test dca-manager
