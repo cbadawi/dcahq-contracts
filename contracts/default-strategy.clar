@@ -5,7 +5,7 @@
 (use-trait share-fee-to-trait 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-share-fee-to-trait.share-fee-to-trait)
 
 
-(define-constant ERR-NOT-AUTHORIZED (err u1000))
+(define-constant ERR-NOT-AUTHORIZED (err u11000))
 
 (define-read-only (is-approved)
 	(contract-call? .auth-v2 is-approved contract-caller)

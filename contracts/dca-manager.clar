@@ -141,12 +141,12 @@
 	(ok (var-set treasury address))
 ))
 
-(define-private (set-user-dca-data (source principal) (target principal) (interval uint) (strategy principal) (is-paused bool) (amount uint)) 
+(define-public (set-user-dca-data (source principal) (target principal) (interval uint) (strategy principal) (is-paused bool) (amount uint) (min-price uint) (max-price uint)) 
 		(let ((user tx-sender)
 					(data (unwrap! (get-dca-data user source target interval strategy) ERR-INVALID-PRINCIPAL))
 					)
 		(ok (map-set dca-data {user:user, source:source, target:target, interval:interval, strategy:strategy} 
-											(merge data {amount: amount, is-paused: is-paused})
+											(merge data {amount: amount, is-paused: is-paused, min-price: min-price, max-price: max-price})
 											)) 
 ))
 
@@ -347,7 +347,7 @@
 			{amount-minus-fee: amount-minus-fee, fee: fee}				
 ))
 
-(define-private (set-new-target-amount (total-source-amount uint) ;; u9999500000
+(define-private (set-new-target-amount (total-source-amount uint)
 																			(total-target-amount uint)
 																			(user-dca-amount-resp (response (tuple (amount-minus-fee uint) (fee uint) (price uint) (key (optional (tuple (interval uint) (source principal) (target principal) (user principal) (strategy principal))))) uint))
 																			)  
@@ -360,7 +360,7 @@
 										(prev-user-target-amount (get target-amount data))
 										(user-source-amount-minus-fee (get amount-minus-fee user-dca-amount))
 										(fee (get fee user-dca-amount))								
-										(user-source-amount-plus-fee (+ fee user-source-amount-minus-fee))  ;; u10000000000
+										(user-source-amount-plus-fee (+ fee user-source-amount-minus-fee)) 
 										(user-source-share (div-down user-source-amount-minus-fee total-source-amount))
 										(user-target-amount (mul-down user-source-share total-target-amount))
 									)
@@ -394,9 +394,12 @@
 																								(get-price-internal source target source-factor))
 )
 
-(define-private (get-price-internal (token-x principal) (token-y principal) (factor uint)) 
+(define-private (get-price-internal (source principal) (target principal) (factor uint))
+		(let ((token-x (if (is-eq target 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.token-wstx-v2) target source))
+					(token-y (if (is-eq target 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.token-wstx-v2) source target))
+					) 
 		(contract-call? 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01 get-price token-x token-y factor)
-)
+))
 
 (define-private (get-price-hop (source principal) (target principal) (source-factor uint) (helper-trait <ft-trait-a>) (helper-factor uint) (is-source-numerator bool)) 
 	(let ((helper (contract-of helper-trait))

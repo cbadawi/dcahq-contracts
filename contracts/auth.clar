@@ -2,7 +2,7 @@
 ;; 																-------- AUTH --------
 ;; 																----------------------
 
-(define-constant ERR-NOT-AUTHORIZED (err u1000))
+(define-constant ERR-NOT-AUTHORIZED (err u12000))
 
 
 (define-data-var contract-owner principal tx-sender)
