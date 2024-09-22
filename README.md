@@ -4,7 +4,9 @@ This repository contains a Clarity smart contract for a Dollar-Cost Averaging (D
 
 ## Overview
 
-The DCA Manager allows users to set up automated, non-custodial, non-kyc purchases. It supports multiple token pairs, custom intervals, and flexible DCA strategies. Users remain in control and can withdraw at any time .
+The DCA Manager allows users to set up automated, non-custodial, amm-agnostic, non-kyc purchases. It supports multiple token pairs, custom intervals, and flexible DCA strategies. Users remain in control and can withdraw at any time .
+
+Currently supports both Velar and Alex token pairs,
 
 ## Key Features
 

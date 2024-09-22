@@ -1,7 +1,7 @@
 (use-trait ft-trait-a 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-sip-010.sip-010-trait)
 (use-trait ft-trait-b 'SP2AKWJYC7BNY18W1XXKPGP0YVEK63QJG4793Z2D4.sip-010-trait-ft-standard.sip-010-trait)
 (use-trait share-fee-to-trait 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-share-fee-to-trait.share-fee-to-trait)
-(use-trait strategy-trait  .strategy-v2.default-strategy)
+(use-trait strategy-trait .strategy-v3.default-strategy)
 
 (define-constant ERR-NOT-AUTHORIZED (err u9999))
 (define-constant ERR-INVALID-AMOUNT (err u9001))
@@ -64,10 +64,9 @@
 												last-updated-timestamp: uint})
 
 (define-map interval-id-to-seconds { interval: uint  } { seconds: uint })
-(map-set interval-id-to-seconds {interval: u0} {seconds: TWO_HOURS}) ;; 2 hrs
-;; (map-set interval-id-to-seconds {interval: u1} {seconds: u43200})  ;; 12 hrs
-(map-set interval-id-to-seconds {interval: u2} {seconds: ONE_DAY}) ;; daily
-(map-set interval-id-to-seconds {interval: u3} {seconds: ONE_WEEK}) ;; weekly
+(map-set interval-id-to-seconds {interval: u0} {seconds: TWO_HOURS}) 
+(map-set interval-id-to-seconds {interval: u1} {seconds: ONE_DAY}) 
+(map-set interval-id-to-seconds {interval: u2} {seconds: ONE_WEEK}) 
 ;; ----------------------------------------------------------------------------------------
 ;; --------------------------------------Getters-------------------------------------------
 ;; ----------------------------------------------------------------------------------------
@@ -82,7 +81,7 @@
 (define-read-only (get-user-keys (user principal)) 
 	(map-get? user-keys {user: user}))
 
-(define-read-only (is-approved) (contract-call? .auth-v2 is-approved contract-caller))
+(define-read-only (is-approved) (contract-call? .auth-v3 is-approved contract-caller))
 
 (define-read-only (is-approved-startegy (strat principal)) (map-get? approved-startegies strat))
 
@@ -175,9 +174,9 @@
 		(asserts! (map-insert dca-data {user:sender, source:source, target:target, interval:interval, strategy: strategy} data) ERR-DCA-ALREADY-EXISTS)
 		(try! (set-new-user-key sender source target interval strategy))
 		(print {function: "create-dca", 
-						input: {user: sender, source-trait: source-trait, target:target, interval:interval, total-amount:total-amount, dca-amount:dca-amount, min-price:min-price, max-price: max-price},
-						more: {more: data }})
-		(contract-call? source-trait transfer total-amount sender .dca-vault-v2 none)
+						input: {user: sender, source-trait: source-trait, target:target, interval:interval, total-amount:total-amount, dca-amount:dca-amount, min-price:min-price, max-price: max-price, strategy:strategy},
+						more: { data: data }})
+		(contract-call? source-trait transfer total-amount sender .dca-vault-v3 none)
 ))
 
 (define-public (add-to-position (source-trait <ft-trait-b>) (target principal) (interval uint) (strategy principal) (amount uint)) 
@@ -187,7 +186,7 @@
 			(data (unwrap! (get-dca-data sender source target interval strategy) ERR-INVALID-KEY))
 			(prev-amount (get source-amount-left data))
 			) 
-		(try! (contract-call? source-trait transfer amount sender .dca-vault-v2 none))
+		(try! (contract-call? source-trait transfer amount sender .dca-vault-v3 none))
 		(print {function: "add-to-position", 
 							input: {source-trait: source-trait, target:target, interval:interval, amount:amount, sender: sender},
 							more: {more: data, prev-amount: prev-amount, source-amount-left: (+ amount prev-amount) }})
@@ -203,7 +202,7 @@
 			(amount-to-reduce (if (> amount prev-amount) prev-amount amount))
 		)
 		(asserts! (> amount-to-reduce u0) ERR-INVALID-AMOUNT)
-		(as-contract (try! (contract-call? .dca-vault-v2 transfer-ft source-trait amount-to-reduce sender)))
+		(as-contract (try! (contract-call? .dca-vault-v3 transfer-ft source-trait amount-to-reduce sender)))
 		(print {function: "reduce-position", 
 							input: {source-trait: source-trait, target:target, interval:interval, amount:amount, sender: sender},
 							more: {more: data, prev-amount: prev-amount, amount-to-reduce: amount-to-reduce }})
@@ -218,7 +217,7 @@
 		(amount-to-withdraw (if (> amount prev-amount) prev-amount amount))
 		) 
 		(asserts! (> amount-to-withdraw u0) ERR-INVALID-AMOUNT)
-		(as-contract (try! (contract-call? .dca-vault-v2 transfer-ft target-trait amount-to-withdraw sender)))
+		(as-contract (try! (contract-call? .dca-vault-v3 transfer-ft target-trait amount-to-withdraw sender)))
 		(print {function: "withdraw", 
 						input: {target-trait: target-trait, source:source, interval:interval, amount:amount, sender: sender},
 						more: {more: data, prev-amount: prev-amount, amount-to-withdraw:amount-to-withdraw }})
@@ -259,7 +258,7 @@
 						)
 						(if (is-eq source-total-amount u0) (ok (list u0)) 
 							(begin 
-								(try! (as-contract (contract-call? .dca-vault-v2 transfer-ft source-trait source-total-amount (contract-of dca-strategy))))
+								(try! (as-contract (contract-call? .dca-vault-v3 transfer-ft source-trait source-total-amount (contract-of dca-strategy))))
 								(let ((target-total-amount (as-contract (try! (contract-call? dca-strategy alex-swap-wrapper source-trait target-trait source-factor source-total-amount min-dy helper-factor helper-trait))))
 											(user-target-amounts (map set-new-target-amount (list source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount)
 																									(list target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount target-total-amount)
@@ -267,7 +266,7 @@
 																								))
 											;; (rounding-error (- target-total-amount (fold + user-target-amounts u0)))
 										)
-										(print { function:"dca-users", 
+										(print { function:"dca-users-a", 
 														input: {source:source-trait, target:target-trait, keys:keys, dca-strategy:dca-strategy, helper-tait:helper-trait},
 														more: {agg-amounts:agg-amounts, amount-dy:amount-dy, min-dy:min-dy, target-total-amount:target-total-amount} })
 										(add-fee fee source)
@@ -298,7 +297,7 @@
 				) 
 				(print {function: "dca-user", 
 								input: {user: user, source: source, target: target, interval: interval, curr-timestamp: curr-timestamp},
-								more: {amount: amount, interval-secoinds: interval-seconds, target-timestamp: target-timestamp}})
+								more: {amount: amount, interval-seconds: interval-seconds, target-timestamp: target-timestamp}})
 				(asserts! (not is-paused) ERR-PAUSED)
 				(asserts! (is-eq (contract-of source-trait) source) ERR-INVALID-PRINCIPAL)
 				(asserts! (is-eq (contract-of target-trait) target) ERR-INVALID-PRINCIPAL)
@@ -366,7 +365,7 @@
 									)
 									(map-set dca-data key (merge data {source-amount-left: (- source-amount-left user-source-amount-plus-fee),
 																	target-amount: (+ prev-user-target-amount user-target-amount)}))
-									(print {function:"set-new-target-amount", more:{user-source-amount-minus-fee: user-source-amount-minus-fee, user-target-amount: user-target-amount,
+									(print {function:"set-new-target-amount", input:{key: key}, more:{user-source-amount-minus-fee: user-source-amount-minus-fee, user-target-amount: user-target-amount,
 																																	user-source-share:user-source-share, total-source-amount: total-source-amount }})								
 									user-target-amount
 								)
@@ -455,7 +454,7 @@
 						)
 						(if (is-eq source-total-amount u0) (ok (list u0)) 
 							(begin 
-								(try! (as-contract (contract-call? .dca-vault-v2 transfer-ft token-in source-total-amount (contract-of dca-strategy))))
+								(try! (as-contract (contract-call? .dca-vault-v3 transfer-ft token-in source-total-amount (contract-of dca-strategy))))
 								(let ((swap-response (as-contract (try! (contract-call? dca-strategy velar-swap-wrapper id token0 token1 token-in token-out share-fee-to source-total-amount min-dy ))))
 											(target-total-amount (get amt-out swap-response))
 											(user-target-amounts (map set-new-target-amount (list source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount  source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount source-total-amount)
@@ -499,7 +498,7 @@
 				) 
 				(print {function: "dca-user-b", 
 								input: {user: user, source: source, target: target, interval: interval, curr-timestamp: curr-timestamp},
-								more: {interval-secoinds: interval-seconds, target-timestamp: target-timestamp}})
+								more: {interval-seconds: interval-seconds, target-timestamp: target-timestamp}})
 				(asserts! (not is-paused) ERR-PAUSED)
 				(asserts! (is-eq (contract-of source-trait) source) ERR-INVALID-PRINCIPAL)
 				(asserts! (is-eq (contract-of target-trait) target) ERR-INVALID-PRINCIPAL)
@@ -579,7 +578,7 @@
 (define-public (transfer-fee-to-treasury (source-trait <ft-trait-a>))
 (let ((source  (contract-of source-trait))
 			(fee (unwrap-panic (get fee (map-get? fee-map {source: source})))))
-		(try! (contract-call? .dca-vault-v2 transfer-ft source-trait fee (var-get treasury)))
+		(try! (contract-call? .dca-vault-v3 transfer-ft source-trait fee (var-get treasury)))
 		(print {function:"transfer-fee-to-treasury", args:{source-trait:source-trait}, more:{fee:fee}})
 		(ok (map-set fee-map {source: source} {fee: u0}))
 ))

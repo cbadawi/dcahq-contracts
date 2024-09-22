@@ -29,7 +29,7 @@
 )
 
 (define-read-only (is-approved)
-	(contract-call? .auth-v2 is-approved contract-caller)
+	(contract-call? .auth-v3 is-approved contract-caller)
 )
 
 (define-public (add-approved-contract (new-approved-contract principal))
