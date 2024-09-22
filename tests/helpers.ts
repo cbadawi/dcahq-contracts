@@ -54,7 +54,7 @@ export const address3 = accounts.get("wallet_3")!
 export const address4 = accounts.get("wallet_4")!
 
 export const contractDeployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
-export const version = "-v3"
+export const version = "-v3-0"
 export const dcaManagerContract = contractDeployer + ".dca-manager" + version
 export const dcaVaultContract = contractDeployer + ".dca-vault" + version
 export const authContract = contractDeployer + ".auth" + version

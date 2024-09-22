@@ -9,35 +9,35 @@ plan:
     - id: 0
       transactions:
         - contract-publish:
-            contract-name: auth-v3
+            contract-name: auth-v3-0
             expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
             cost: 529852
             path: contracts/dist/auth.clar
             anchor-block-only: true
             clarity-version: 2
         - contract-publish:
-            contract-name: dca-vault-v3
+            contract-name: dca-vault-v3-0
             expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
             cost: 529809
             path: contracts/dist/dca-vault.clar
             anchor-block-only: true
             clarity-version: 2
         - contract-publish:
-            contract-name: strategy-v3
+            contract-name: strategy-v3-0
             expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
             cost: 529895
             path: contracts/dist/strategy.clar
             anchor-block-only: true
             clarity-version: 2
         - contract-publish:
-            contract-name: dca-manager-v3
+            contract-name: dca-manager-v3-0
             expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
             cost: 536971
             path: contracts/dist/dca-manager.clar
             anchor-block-only: true
             clarity-version: 2
         - contract-publish:
-            contract-name: default-strategy-v3
+            contract-name: default-strategy-v3-0
             expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
             cost: 530153
             path: contracts/dist/default-strategy.clar

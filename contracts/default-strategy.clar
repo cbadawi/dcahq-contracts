@@ -1,4 +1,4 @@
-(impl-trait .strategy-v3.default-strategy)
+(impl-trait .strategy-v3-0.default-strategy)
 
 (use-trait ft-trait-a 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-sip-010.sip-010-trait)
 (use-trait ft-trait-b 'SP2AKWJYC7BNY18W1XXKPGP0YVEK63QJG4793Z2D4.sip-010-trait-ft-standard.sip-010-trait)
@@ -8,7 +8,7 @@
 (define-constant ERR-NOT-AUTHORIZED (err u11000))
 
 (define-read-only (is-approved)
-	(contract-call? .auth-v3 is-approved contract-caller)
+	(contract-call? .auth-v3-0 is-approved contract-caller)
 )
 
 (define-public (velar-swap-wrapper (id uint)
@@ -24,7 +24,7 @@
 		(let ((swap-response (try! (as-contract (contract-call? 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-router swap-exact-tokens-for-tokens id token0 token1 token-in token-out share-fee-to amt-in amt-out-min))))
 					(amt-out (get amt-out swap-response))
 					)
-				(try! (as-contract (contract-call? token-out transfer amt-out tx-sender .dca-vault-v3 none)))
+				(try! (as-contract (contract-call? token-out transfer amt-out tx-sender .dca-vault-v3-0 none)))
 			(ok swap-response)
 )))
 
@@ -38,7 +38,7 @@
 (begin
 	(asserts! (is-approved) ERR-NOT-AUTHORIZED) 
 	(let ((swap-response (try! (alex-swap-internal source-trait target-trait source-factor dx min-d-target factor-hop hop-trait-opt))))
-				(try! (as-contract (contract-call? target-trait transfer swap-response tx-sender .dca-vault-v3 none)))
+				(try! (as-contract (contract-call? target-trait transfer swap-response tx-sender .dca-vault-v3-0 none)))
 				(print {function:"swap-wrapper", 
 								params:{source-trait:source-trait, target-trait:target-trait, source-factor:source-factor, dx:dx, min-d-target:min-d-target, facotr-hop:factor-hop, hop-trait-opt:hop-trait-opt},
 								more:{swap-response:swap-response}})
