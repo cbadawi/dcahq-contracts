@@ -242,6 +242,7 @@
 																			curr-timestamp-list
 													))
 					)
+					(asserts! (is-approved) ERR-NOT-AUTHORIZED) ;; Initially, only approved users can run this function to minimize the risk of intentional slippage. In future versions, a decentralized network will take over this role.
 					(print {user-amounts: user-amounts})
 					(unwrap! (map-get? approved-startegies (contract-of dca-strategy)) ERR-INVALID-STRATEGY)
 					(let ((source-target-config (unwrap! (map-get? sources-targets-config {source: source, target: target}) ERR-INVALID-PRINCIPAL))
@@ -435,6 +436,7 @@
 																				curr-timestamp-list
 																				))
 					)
+					(asserts! (is-approved) ERR-NOT-AUTHORIZED) ;; Initially, only approved users can run this function to minimize the risk of intentional slippage. In future versions, a decentralized network will take over this role.
 					(asserts! (and (is-eq (contract-of token0) (get token0 source-target-config))
 													(is-eq (contract-of token1) (get token1 source-target-config))
 													(is-eq (contract-of token-in) (get token-in source-target-config))

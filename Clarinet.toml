@@ -67,29 +67,29 @@ clarity_version = 2
 epoch = 2.4
 
 [contracts.sbtc]
-path = 'contracts/tokens/sbtc.clar'
+path = 'contracts/mocks/tokens/sbtc.clar'
 clarity_version = 2
 epoch = 2.4
 
 
 
 [contracts.welsh]
-path = 'contracts/tokens/welsh.clar'
+path = 'contracts/mocks/tokens/welsh.clar'
 clarity_version = 2
 epoch = 2.4
 
 [contracts.wstx]
-path = 'contracts/tokens/wstx.clar'
+path = 'contracts/mocks/tokens/wstx.clar'
 clarity_version = 2
 epoch = 2.4
 
 [contracts.wusd]
-path = 'contracts/tokens/wusd.clar'
+path = 'contracts/mocks/tokens/wusd.clar'
 clarity_version = 2
 epoch = 2.4
 
 [contracts.wusd-6]
-path = 'contracts/tokens/wusd-6.clar'
+path = 'contracts/mocks/tokens/wusd-6.clar'
 clarity_version = 2
 epoch = 2.4
 
