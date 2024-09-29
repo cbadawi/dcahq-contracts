@@ -10,7 +10,7 @@
 (map-set approved-contracts (as-contract tx-sender) true)
 
 (define-read-only (is-owner)
-  (is-eq tx-sender (var-get contract-owner))
+  (is-eq contract-caller (var-get contract-owner))
 )
 (define-read-only (is-approved (address principal))
   (default-to false (map-get? approved-contracts address))
