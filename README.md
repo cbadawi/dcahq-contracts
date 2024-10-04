@@ -123,6 +123,8 @@ They are almost identical except that :
 
 They process multiple user DCA positions by aggregating their swap amounts and executing a bulk swap through the Alex AMM. This approach optimizes gas fees and ensures efficient execution of swaps.
 
+Built to be fault tolerant. If one user's validation fails, the function will continue processing the rest of the users without updating the faulty user's dca-data map.
+
 Important Parametere:
 
 - keys: A list of up to 50 user DCA keys. A kew is a tuple that defines a DCA Position. Where each key contains:
