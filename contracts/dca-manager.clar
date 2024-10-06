@@ -26,7 +26,7 @@
 (define-data-var treasury principal tx-sender)
 
 (define-map sources-targets-config {source: principal, target: principal} 
-																{id: uint,
+																{
 																fee-fixed: uint, 
 																fee-percent: uint,
 																source-factor: uint,
@@ -35,6 +35,7 @@
 																min-dca-threshold: uint, 
 																max-dca-threshold: uint, 
 																max-slippage: uint,
+																id: uint,
 																token0: principal,
 																token1: principal,
 																token-in: principal,
@@ -50,7 +51,7 @@
 (define-map fee-map { source: principal } { fee: uint })
 
 (define-map dca-data { user: principal,
-												source: principal,
+												source: principal, 
 												target: principal,
 												interval: uint,
 												;; a user can have multiple strategies on the same source-target combination
@@ -82,6 +83,7 @@
 	(map-get? user-keys {user: user}))
 
 (define-read-only (is-approved) (contract-call? .auth-v3-0 is-approved contract-caller))
+(define-read-only (is-approved-dca-network) (contract-call? .auth-v3-0 is-approved-dca-network contract-caller))
 
 (define-read-only (is-approved-startegy (strat principal)) (map-get? approved-startegies strat))
 
@@ -242,7 +244,7 @@
 																			curr-timestamp-list
 													))
 					)
-					(asserts! (is-approved) ERR-NOT-AUTHORIZED) ;; Initially, only approved users can run this function to minimize the risk of intentional slippage. In future versions, a decentralized network will take over this role.
+					(asserts! (is-approved-dca-network) ERR-NOT-AUTHORIZED) ;; Initially, only approved users can run this function to minimize the risk of intentional slippage. In future versions, a decentralized network will take over this role.
 					(print {user-amounts: user-amounts})
 					(unwrap! (map-get? approved-startegies (contract-of dca-strategy)) ERR-INVALID-STRATEGY)
 					(let ((source-target-config (unwrap! (map-get? sources-targets-config {source: source, target: target}) ERR-INVALID-PRINCIPAL))
@@ -378,7 +380,7 @@
 
 (define-private (aggregate-amounts (curr-resp (response (tuple (amount-minus-fee uint) (price uint) (fee uint) (key (optional (tuple (strategy principal) (interval uint) (source principal) (target principal) (user principal))))) uint))
 																		(prev (tuple (total-amount uint) (fee uint) (price uint))))
-		(let ((curr (match curr-resp curr curr err-curr {amount-minus-fee:u0, fee:u0, price: u0, key: none}))
+		(let ((curr (match curr-resp curr curr err-curr {amount-minus-fee: u0, fee: u0, price: u0, key: none}))
 					(curr-amount-minus-fee (get amount-minus-fee curr))
 					(curr-fee (get fee curr))
 					(curr-price (get price curr))
@@ -395,8 +397,8 @@
 )
 
 (define-private (get-price-internal (source principal) (target principal) (factor uint))
-		(let ((token-x (if (is-eq target 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.token-wstx-v2) target source))
-					(token-y (if (is-eq target 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.token-wstx-v2) source target))
+		(let ((token-x (if (is-eq target 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.token-wstx-v3-0) target source))
+					(token-y (if (is-eq target 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.token-wstx-v3-0) source target))
 					) 
 		(contract-call? 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01 get-price token-x token-y factor)
 ))
@@ -436,7 +438,7 @@
 																				curr-timestamp-list
 																				))
 					)
-					(asserts! (is-approved) ERR-NOT-AUTHORIZED) ;; Initially, only approved users can run this function to minimize the risk of intentional slippage. In future versions, a decentralized network will take over this role.
+					(asserts! (is-approved-dca-network) ERR-NOT-AUTHORIZED) ;; Initially, only approved users can run this function to minimize the risk of intentional slippage. In future versions, a decentralized network will take over this role.
 					(asserts! (and (is-eq (contract-of token0) (get token0 source-target-config))
 													(is-eq (contract-of token1) (get token1 source-target-config))
 													(is-eq (contract-of token-in) (get token-in source-target-config))
