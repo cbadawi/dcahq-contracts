@@ -90,6 +90,10 @@
 (define-read-only (get-interval-seconds (interval uint))
   (map-get? interval-id-to-seconds {interval: interval})
 )
+
+(define-read-only (get-block-timestamp (block uint)) 
+	(unwrap-panic (get-block-info? time block))
+)
 ;; ----------------------------------------------------------------------------------------
 ;; --------------------------------------Setters-------------------------------------------
 ;; ----------------------------------------------------------------------------------------
@@ -176,7 +180,7 @@
 		(asserts! (map-insert dca-data {user:sender, source:source, target:target, interval:interval, strategy: strategy} data) ERR-DCA-ALREADY-EXISTS)
 		(try! (set-new-user-key sender source target interval strategy))
 		(print {function: "create-dca", 
-						input: {user: sender, source-trait: source-trait, target:target, interval:interval, total-amount:total-amount, dca-amount:dca-amount, min-price:min-price, max-price: max-price, strategy:strategy},
+						input: {user: sender, source: source-trait, target:target, interval:interval, total-amount:total-amount, dca-amount:dca-amount, min-price:min-price, max-price: max-price, strategy:strategy},
 						more: { data: data }})
 		(contract-call? source-trait transfer total-amount sender .dca-vault-v3-0 none)
 ))
@@ -235,7 +239,7 @@
 													)
 		(let ((source (contract-of source-trait))
 					(target (contract-of target-trait))
-					(curr-timestamp (unwrap-panic (get-block-info? time (- block-height u1))))
+					(curr-timestamp (get-block-timestamp (- block-height u1)))
 					(curr-timestamp-list (list curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp))
 					(user-amounts (map dca-user (list source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait source-trait)
 																			(list target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait target-trait)
@@ -365,11 +369,12 @@
 										(user-source-amount-plus-fee (+ fee user-source-amount-minus-fee)) 
 										(user-source-share (div-down user-source-amount-minus-fee total-source-amount))
 										(user-target-amount (mul-down user-source-share total-target-amount))
+										(new-target-amount (+ prev-user-target-amount user-target-amount))
 									)
 									(map-set dca-data key (merge data {source-amount-left: (- source-amount-left user-source-amount-plus-fee),
-																	target-amount: (+ prev-user-target-amount user-target-amount)}))
+																	target-amount: new-target-amount}))
 									(print {function:"set-new-target-amount", input:{key: key}, more:{user-source-amount-minus-fee: user-source-amount-minus-fee, user-target-amount: user-target-amount,
-																																	user-source-share:user-source-share, total-source-amount: total-source-amount }})								
+																																	user-source-share:user-source-share, total-source-amount: total-source-amount, new-target-amount: new-target-amount }})								
 									user-target-amount
 								)
 								u0
@@ -428,7 +433,7 @@
 		(let ((source (contract-of token-in))
 					(target (contract-of token-out))
 					(source-target-config (unwrap! (map-get? sources-targets-config {source: source, target: target}) ERR-INVALID-PRINCIPAL))
-					(curr-timestamp (unwrap-panic (get-block-info? time (- block-height u1))))
+					(curr-timestamp (get-block-timestamp (- block-height u1)))
 					(curr-timestamp-list (list curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp curr-timestamp))
 					(user-amounts (map dca-user-b (list token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0 token0)
 																				(list token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1 token1)
