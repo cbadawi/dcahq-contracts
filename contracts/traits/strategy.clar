@@ -23,6 +23,6 @@
             <share-fee-to-trait>
             uint 
             uint 
-        ;; ) (response (tuple (amt-out uint)) uint))
-        ) (response (tuple (a uint) (amt-fee-lps uint) (amt-fee-protocol uint) (amt-fee-rest uint) (amt-fee-share uint) (amt-in uint) (amt-in-adjusted uint) (amt-out uint) (b uint) (b0 uint) (b1 uint) (id uint) (k uint) (op (string-ascii 4)) (pool (tuple (block-height uint) (burn-block-height uint) (lp-token principal) (protocol-fee (tuple (den uint) (num uint))) (reserve0 uint) (reserve1 uint) (share-fee (tuple (den uint) (num uint))) (swap-fee (tuple (den uint) (num uint))) (symbol (string-ascii 65)) (token0 principal) (token1 principal))) (token-in <ft-trait-b>) (token-out <ft-trait-b>) (user principal)) uint))
+        ) (response (tuple (amt-out uint)) uint))
+        ;; ) (response (tuple (a uint) (amt-fee-lps uint) (amt-fee-protocol uint) (amt-fee-rest uint) (amt-fee-share uint) (amt-in uint) (amt-in-adjusted uint) (amt-out uint) (b uint) (b0 uint) (b1 uint) (id uint) (k uint) (op (string-ascii 4)) (pool (tuple (block-height uint) (burn-block-height uint) (lp-token principal) (protocol-fee (tuple (den uint) (num uint))) (reserve0 uint) (reserve1 uint) (share-fee (tuple (den uint) (num uint))) (swap-fee (tuple (den uint) (num uint))) (symbol (string-ascii 65)) (token0 principal) (token1 principal))) (token-in <ft-trait-b>) (token-out <ft-trait-b>) (user principal)) uint))
 ))

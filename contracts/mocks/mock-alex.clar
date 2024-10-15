@@ -1,7 +1,7 @@
 ;; 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01
 (use-trait ft  'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.trait-sip-010.sip-010-trait)
 
-(define-public (get-price (token-x principal) (token-y principal) (factor uint)) 
+(define-read-only (get-price (token-x principal) (token-y principal) (factor uint)) 
 (begin (asserts! true (err u420))
 	(ok u200000)
 ))

@@ -54,7 +54,7 @@ export const address3 = accounts.get("wallet_3")!
 export const address4 = accounts.get("wallet_4")!
 
 export const contractDeployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
-export const version = "-v3-0"
+export const version = "-v0-0"
 export const dcaManagerContract = contractDeployer + ".dca-manager" + version
 export const dcaVaultContract = contractDeployer + ".dca-vault" + version
 export const authContract = contractDeployer + ".auth" + version
@@ -83,7 +83,11 @@ export const defaultSourcesTokenConfig: SourcesTargetConfigsParams = {
   minDcaThreshold: 0,
   maxDcaThreshold: maxUint128Value,
   maxSlipage: fourPercent,
-  isSourceNumerator: false
+  isSourceNumerator: false,
+  token0: sourceToken,
+  token1: targetToken,
+  tokenIn: sourceToken,
+  tokenOut: targetToken
 }
 
 export enum INTERVALS {
@@ -96,6 +100,15 @@ export const addApproved = (address: string) => {
   return simnet.callPublicFn(
     authContract,
     "add-approved-contract",
+    [Cl.principal(address)],
+    contractDeployer
+  )
+}
+
+export const addApprovedDCANetwork = (address: string) => {
+  return simnet.callPublicFn(
+    authContract,
+    "add-approved-dca-network",
     [Cl.principal(address)],
     contractDeployer
   )
@@ -122,6 +135,10 @@ type SourcesTargetConfigsParams = {
   maxDcaThreshold: number
   maxSlipage: number
   isSourceNumerator?: boolean
+  token0: string
+  token1: string
+  tokenIn: string
+  tokenOut: string
 }
 
 export const setSourcesTargetsConfig = ({
@@ -135,7 +152,11 @@ export const setSourcesTargetsConfig = ({
   minDcaThreshold,
   maxDcaThreshold,
   maxSlipage,
-  isSourceNumerator = true
+  isSourceNumerator = true,
+  token0,
+  token1,
+  tokenIn,
+  tokenOut
 }: SourcesTargetConfigsParams) => {
   console.log({ feeFixed })
   return simnet.callPublicFn(
@@ -152,7 +173,11 @@ export const setSourcesTargetsConfig = ({
       Cl.bool(isSourceNumerator),
       Cl.uint(minDcaThreshold),
       Cl.uint(maxDcaThreshold),
-      Cl.uint(maxSlipage)
+      Cl.uint(maxSlipage),
+      Cl.principal(token0),
+      Cl.principal(token1),
+      Cl.principal(tokenIn),
+      Cl.principal(tokenOut)
     ],
     contractDeployer
   )
@@ -390,6 +415,7 @@ export const initDca = (
   addApproved(contractDeployer)
   addApproved(dcaManagerContract)
   addApproved(ammMockContract)
+  addApprovedDCANetwork(address1)
   addApproved(defaultStrategyContract) // only required in test
   addStrategy(defaultStrategyContract)
   setSourcesTargetsConfig({
@@ -403,7 +429,11 @@ export const initDca = (
     minDcaThreshold: 0,
     maxDcaThreshold: maxUint128Value,
     maxSlipage: UNIT * 0.5,
-    isSourceNumerator
+    isSourceNumerator,
+    token0: source,
+    token1: target,
+    tokenIn: source,
+    tokenOut: target
   })
   mintSourceToken(address, totalAmount, source)
   return createDCA({

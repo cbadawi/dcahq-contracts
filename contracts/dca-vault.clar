@@ -6,7 +6,7 @@
 (define-data-var paused bool false)
 
 (define-read-only (is-approved)
-	(contract-call? .auth-v3-0 is-approved contract-caller)
+	(contract-call? .auth-v0-0 is-approved contract-caller)
 )
 
 (define-read-only (is-paused) 

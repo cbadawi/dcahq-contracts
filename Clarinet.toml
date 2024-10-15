@@ -29,27 +29,27 @@ contract_id = 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-core'
 [[project.requirements]]
 contract_id = 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-library'
 
-[contracts.auth-v3-0]
+[contracts.auth-v0-0]
 path = 'contracts/auth.clar'
 clarity_version = 2
 epoch = 2.4
 
-[contracts.dca-manager-v3-0]
+[contracts.dca-manager-v0-0]
 path = 'contracts/dca-manager.clar'
 clarity_version = 2
 epoch = 2.4
 
-[contracts.dca-vault-v3-0]
+[contracts.dca-vault-v0-0]
 path = 'contracts/dca-vault.clar'
 clarity_version = 2
 epoch = 2.4
 
-[contracts.default-strategy-v3-0]
+[contracts.default-strategy-v0-0]
 path = 'contracts/default-strategy.clar'
 clarity_version = 2
 epoch = 2.4
 
-[contracts.strategy-v3-0]
+[contracts.strategy-v0-0]
 path = 'contracts/traits/strategy.clar'
 clarity_version = 2
 epoch = 2.4
