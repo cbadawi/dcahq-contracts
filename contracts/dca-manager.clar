@@ -352,7 +352,7 @@
 ;; token 0 & 1 define the pool
 ;; @param token0 define the pool
 ;; @param token1 define the pool
-;; @param mock-price, the velar getprice requires
+;; @param mock-price, the velar getprice requires the trade amount which is unknown, so instead of calculating it for each user's amount, provide a mock-price and assert it is close-enough when the traded amount is known
 (define-public (dca-users-b (dca-strategy <strategy-trait>)
 														(token0 <ft-trait-b>)
 														(token1 <ft-trait-b>)
@@ -376,31 +376,40 @@
 					(total-source-amount (get amount agg-amounts))
 					(price (try! (get-price-b id (contract-of token0) source total-source-amount is-source-numerator)))
 				)
-				;; (print {user-amounts: user-amounts-opt, fee:fee })
+				(print {agg-amounts: agg-amounts, price: price })
 				(asserts! (> total-source-amount u0) ERR-INVALID-AMOUNT)
 				(asserts! (and (>= mock-price (mul-down-6 price (- ONE_6 max-slippage))) (<= mock-price (mul-down-6 price (+ ONE_6 max-slippage)))) ERR-INVALID-PRICE)
 				(asserts! (is-approved-dca-network) ERR-NOT-AUTHORIZED) ;; Initially, only approved users can run this function to minimize the risk of intentional slippage. In future versions, a decentralized network will take over this role.
 				(unwrap! (map-get? approved-startegies (contract-of dca-strategy)) ERR-INVALID-STRATEGY)
-					(begin 
-						
-						
 				(match user-amounts-opt user-amounts
 															(let ((fee (* (get fee-fixed source-target-config) (len (filter is-none-zero user-amounts))))
 																		(traded-source-amount (- total-source-amount fee))
 																	) 
 																	(add-fee fee source)
 																	(try! (as-contract (contract-call? .dca-vault-v0-0 transfer-ft token-in traded-source-amount (contract-of dca-strategy))))
-																	(let ((total-target-amount (as-contract (try! (contract-call? dca-strategy velar-swap-wrapper id token0 token1 token-in token-out share-fee-to total-source-amount (mul-down-6 (if is-source-numerator (mul-down-6 price total-source-amount) (div-down-6 total-source-amount price)) (- ONE_6 max-slippage)) ))))
+																	(let ((total-target-amount (as-contract (try! (contract-call? dca-strategy velar-swap-wrapper id 
+																																																																token0 
+																																																																token1 
+																																																																token-in 
+																																																																token-out 
+																																																																share-fee-to 
+																																																																traded-source-amount 
+																																																																(mul-down-6 (if is-source-numerator 
+																																																																							(mul-down-6 price traded-source-amount) 
+																																																																							(div-down-6 traded-source-amount price)) 
+																																																																						(- ONE_6 max-slippage)) ))))
 																				)
 																			(ok (map set-new-amounts (list total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount total-source-amount)
 																															(list total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount total-target-amount)
 																															user-amounts ;; total amount + fees
 																															keys
-																															)))
+																															))
 																)
-																ERR-INVALID-USER-AMOUNTS
-						)
-)))
+																)
+															ERR-INVALID-USER-AMOUNTS
+				)
+))
+
 
 (define-read-only (get-price-b (id uint) (token0 principal) (token-in principal) (amt-source uint) (is-source-numerator bool)) 
 	(let ((pool (contract-call? 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-core do-get-pool id))
