@@ -8,39 +8,39 @@ plan:
   batches:
     - id: 0
       transactions:
-        - contract-publish:
-            contract-name: auth-v3-0
-            expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-            cost: 3282958
-            path: ontracts/dist/auth.clar
-            anchor-block-only: true
-            clarity-version: 2
+        # - contract-publish:
+        #     contract-name: auth-v3-0
+        #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
+        #     cost: 5628123
+        #     path: ontracts/dist/auth.clar
+        #     anchor-block-only: true
+        #     clarity-version: 2
+        # - contract-publish:
+        #     contract-name: dca-vault-v3-0
+        #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
+        #     cost: 4865103
+        #     path: ontracts/dist/dca-vault.clar
+        #     anchor-block-only: true
+        #     clarity-version: 2
+        # - contract-publish:
+        #     contract-name: strategy-v3-0
+        #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
+        #     cost: 4865510
+        #     path: ontracts/dist/strategy.clar
+        #     anchor-block-only: true
+        #     clarity-version: 2
         - contract-publish:
             contract-name: dca-manager-v3-0
             expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-            cost: 3305729
-            path: ontracts/dist/dca-manager.clar
+            cost: 2099256
+            path: contracts/dist/dca-manager.clar
             anchor-block-only: true
             clarity-version: 2
-        - contract-publish:
-            contract-name: dca-vault-v3-0
-            expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-            cost: 3282821
-            path: ontracts/dist/dca-vault.clar
-            anchor-block-only: true
-            clarity-version: 2
-        - contract-publish:
-            contract-name: default-strategy-v3-0
-            expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-            cost: 3283918
-            path: ontracts/dist/default-strategy.clar
-            anchor-block-only: true
-            clarity-version: 2
-        - contract-publish:
-            contract-name: strategy-v3-0
-            expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
-            cost: 3283095
-            path: ontracts/dist/strategy.clar
-            anchor-block-only: true
-            clarity-version: 2
+        # - contract-publish:
+        #     contract-name: default-strategy-v3-0
+        #     expected-sender: SPNG8GDC6VW6SPAGE5M9ZCASPJWK65NDTH2E84HX
+        #     cost: 4866730
+        #     path: ontracts/dist/default-strategy.clar
+        #     anchor-block-only: true
+        #     clarity-version: 2
       epoch: "2.4"

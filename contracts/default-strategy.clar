@@ -21,12 +21,11 @@
 																	(amt-out-min uint))
   (begin
 		(asserts! (is-approved) ERR-NOT-AUTHORIZED) 
-		;; (let ((swap-response (try! (as-contract (contract-call? 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-router swap-exact-tokens-for-tokens id token0 token1 token-in token-out share-fee-to amt-in amt-out-min))))
-		(let ((swap-response (try! (as-contract (contract-call? .mock-velar swap-exact-tokens-for-tokens id token0 token1 token-in token-out share-fee-to amt-in amt-out-min))))
+		(let ((swap-response (try! (as-contract (contract-call? 'SP1Y5YSTAHZ88XYK1VPDH24GY0HPX5J4JECTMY4A1.univ2-router swap-exact-tokens-for-tokens id token0 token1 token-in token-out share-fee-to amt-in amt-out-min))))
 					(amt-out (get amt-out swap-response))
 					)
 				(try! (as-contract (contract-call? token-out transfer amt-out tx-sender .dca-vault-v0-0 none)))
-			(ok swap-response)
+			(ok (get amt-out swap-response))
 )))
 
 (define-public (alex-swap-wrapper (source-trait <ft-trait-a>) 
@@ -40,9 +39,6 @@
 	(asserts! (is-approved) ERR-NOT-AUTHORIZED) 
 	(let ((swap-response (try! (alex-swap-internal source-trait target-trait source-factor dx min-d-target factor-hop hop-trait-opt))))
 				(try! (as-contract (contract-call? target-trait transfer swap-response tx-sender .dca-vault-v0-0 none)))
-				(print {function:"swap-wrapper", 
-								params:{source-trait:source-trait, target-trait:target-trait, source-factor:source-factor, dx:dx, min-d-target:min-d-target, facotr-hop:factor-hop, hop-trait-opt:hop-trait-opt},
-								more:{swap-response:swap-response}})
 				(ok swap-response)
 )))
 
@@ -54,8 +50,6 @@
 															(factor-hop uint)
 															(hop-trait-opt (optional <ft-trait-a>))) 
 			(match hop-trait-opt hop-trait 
-							(as-contract (contract-call? .mock-alex swap-helper-a source-trait hop-trait target-trait source-factor factor-hop dx (some min-d-target)))
-							;; (as-contract (contract-call? 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01 swap-helper-a source-trait hop-trait target-trait source-factor factor-hop dx (some min-d-target)))
-							(as-contract (contract-call? .mock-alex swap-helper source-trait target-trait source-factor dx (some min-d-target)))
-							;; (as-contract (contract-call? 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01 swap-helper source-trait target-trait source-factor dx (some min-d-target)))
+							(as-contract (contract-call? 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01 swap-helper-a source-trait hop-trait target-trait source-factor factor-hop dx (some min-d-target)))
+							(as-contract (contract-call? 'SP102V8P0F7JX67ARQ77WEA3D3CFB5XW39REDT0AM.amm-pool-v2-01 swap-helper source-trait target-trait source-factor dx (some min-d-target)))
 ))
